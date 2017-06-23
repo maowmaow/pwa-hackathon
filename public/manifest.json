@@ -1,0 +1,15 @@
+{
+  "name": "change-me",
+  "short_name": "change-me",
+  "scope": "./",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#c8c246",
+  "background_color": "#c8c246",
+  "icons": [{
+    "src": "img/lannister.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }]
+}
