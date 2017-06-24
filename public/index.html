@@ -12,9 +12,9 @@
       <link href="css/app.css" rel="stylesheet">
     </head>
     <body>
-      <div id="app">
-	<nav class="nav-extended teal lighten-3">
-		<div class="nav-wrapper">
+    <div id="app">
+      <nav class="nav-extended teal lighten-3">
+          <div class="nav-wrapper">
             <a href="#" class="brand-logo">
                 <img class="valign-wrapper" src="img/ic_launcher2.png" style="width: 60px;height: 60px;">
             </a>
@@ -22,17 +22,25 @@
               <i class="material-icons">menu</i>
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-              <li v-if="isLoggedIn"><a href="sass.html">{{profile.displayName}}</a></li>
-              <li><a href="badges.html">Components</a></li>
-              <li v-if="isLoggedIn"><a href="javascript:void(0)" v-on:click="logout">Logout</a></li>
+              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+             <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
-              <li v-if="isLoggedIn"><a href="sass.html">{{profile.displayName}}</a></li>
-              <li><a href="badges.html">Components</a></li>
-              <li v-if="isLoggedIn"><a href="javascript:void(0)" v-on:click="logout">Logout</a></li>
+              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
-		</div>
-        <div class="nav-content">
+          </div>
+          <div class="nav-content">
             <ul class="tabs tabs-transparent">
               <li class="tab"><a class="active" href="#tap1">Borrow Me</a></li>
               <li class="tab"><a href="#tap2">Lend Me</a></li>
@@ -42,10 +50,8 @@
         </div>
 	</nav>
 
-	<div class="container" v-show="!isLoggedIn">
-		<button v-on:click="login">
-			<i class="material-icons">account_circle</i>Sign-in with Google
-		</button>
+	<div id="sign-in" class="center-align" v-show="!isLoggedIn">
+		<div class="waves-effect waves-light btn" v-on:click="login"><i class="icon-google left"></i>Sign-in with Google</div>
 	</div>
 	<div class="container" v-show="isLoggedIn">
         <div id="test1" class="col s12">
@@ -204,12 +210,11 @@
             </li>
           </ul>
         </div>
-      </div>
-   </div>
         <!-- Add Button -->
         <div class="fixed-action-btn" style="bottom: 25px; right: 20px;">
           <a class="btn-floating btn-large waves-effect waves-light" data-target="modal1"><i class="material-icons">add</i></a>
         </div>
+      </div>  
 
         <!-- Modal Structure -->
         <div id="modal1" class="modal">
@@ -241,7 +246,7 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">ADD</a>
           </div>
         </div>
-      
+    </div>
     <!-- script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script -->
     <script src="js/firebase.js"></script>
     <script src="js/jquery-3.2.1.min.js"></script>
