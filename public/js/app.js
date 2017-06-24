@@ -56,7 +56,8 @@ var datastore = (function(firebase) {
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
-		firebase.database().ref('dashboard/' + lender)
+		database.ref('dashboard/' + lender + '/' + key).set(debt);
+		database.ref('dashboard/' + borrower + '/' + key).set(debt);
 	}
 	
 	function addMember(user) {
