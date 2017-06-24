@@ -1,6 +1,6 @@
 {
-  "name": "change-me",
-  "short_name": "change-me",
+  "name": "Debt Remind",
+  "short_name": "Debt Remind",
   "scope": "./",
   "start_url": "index.html",
   "display": "standalone",
