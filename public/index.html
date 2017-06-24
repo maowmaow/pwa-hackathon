@@ -24,14 +24,22 @@
               <i class="material-icons">menu</i>
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-              <li><a href="sass.html">Sass</a></li>
-              <li><a href="badges.html">Components</a></li>
-              <li><a href="collapsible.html">JavaScript</a></li>
+              <li><a href="#" class="valign-wrapper user">
+                    <div hidden class="user-pic left" id="user-pic" ></div>
+                    <span hidden class="user-name" id="user-name" ></span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+             <li hidden class="sign-out"><a href="#">Sign-out</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
-              <li><a href="sass.html">Sass</a></li>
-              <li><a href="badges.html">Components</a></li>
-              <li><a href="collapsible.html">JavaScript</a></li>
+              <li><a href="#" class="valign-wrapper user">
+                    <div hidden class="user-pic left" id="user-pic" ></div>
+                    <span hidden class="user-name" id="user-name" ></span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+              <li hidden class="sign-out"><a href="#">Sign-out</a></li>
             </ul>
           </div>
           <div class="nav-content">
@@ -43,16 +51,8 @@
             </ul>
           </div>
       </nav>
-      <div>
-        
-        <div hidden id="user-name"></div>
-        <div hidden id="user-pic"></div>
-        <button hidden id="sign-out">
-          Sign-out
-        </button>
-        <button hidden id="sign-in">
-          <i class="material-icons">account_circle</i>Sign-in with Google
-        </button>
+      <div hidden id="sign-in" class="center-align">
+        <div class="waves-effect waves-light btn"><i class="icon-google left"></i>Sign-in with Google</div>
       </div>
       <div class="container">
         <div id="tap1" class="col s12">
@@ -211,11 +211,11 @@
             </li>
           </ul>
         </div>
-      </div>  
         <!-- Add Button -->
         <div class="fixed-action-btn" style="bottom: 25px; right: 20px;">
           <a class="btn-floating btn-large waves-effect waves-light" data-target="modal1"><i class="material-icons">add</i></a>
         </div>
+      </div>  
 
         <!-- Modal Structure -->
         <div id="modal1" class="modal">

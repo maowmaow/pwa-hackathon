@@ -14,16 +14,16 @@ function DebtRemind() {
   // this.submitImageButton = document.getElementById('submitImage');
   // this.imageForm = document.getElementById('image-form');
   // this.mediaCapture = document.getElementById('mediaCapture');
-  this.userPic = document.getElementById('user-pic');
-  this.userName = document.getElementById('user-name');
-  this.signInButton = document.getElementById('sign-in');
-  this.signOutButton = document.getElementById('sign-out');
-  this.signInSnackbar = document.getElementById('must-signin-snackbar');
+  this.userPic = $('.user-pic');
+  this.userName = $('.user-name');
+  this.signInButton = $('#sign-in');
+  this.signOutButton = $('.sign-out');
+  this.signInSnackbar = $('#must-signin-snackbar');
 
   // Saves message on form submit.
   // this.messageForm.addEventListener('submit', this.saveMessage.bind(this));
-  this.signOutButton.addEventListener('click', this.signOut.bind(this));
-  this.signInButton.addEventListener('click', this.signIn.bind(this));
+  this.signOutButton.on('click', this.signOut.bind(this));
+  this.signInButton.on('click', this.signIn.bind(this));
 
   // Toggle for the button.
   // var buttonTogglingHandler = this.toggleButton.bind(this);
@@ -237,16 +237,16 @@ DebtRemind.prototype.onAuthStateChanged = function(user) {
     var userName = user.displayName;  
 
     // Set the user's profile pic and name.
-    this.userPic.style.backgroundImage = 'url(' + profilePicUrl + ')';
-    this.userName.textContent = userName;
+    this.userPic.css('background-image' , 'url(' + profilePicUrl + ')');
+    this.userName.text(userName);
 
     // Show user's profile and sign-out button.
-    this.userName.removeAttribute('hidden');
-    this.userPic.removeAttribute('hidden');
-    this.signOutButton.removeAttribute('hidden');
+    this.userName.prop('hidden', false);
+    this.userPic.prop('hidden', false);
+    this.signOutButton.prop('hidden', false);
 
     // Hide sign-in button.
-    this.signInButton.setAttribute('hidden', 'true');
+    this.signInButton.prop('hidden', true);
 
     // We load currently existing messages.
     // this.loadMessages();
@@ -261,14 +261,14 @@ DebtRemind.prototype.onAuthStateChanged = function(user) {
     this.saveMessagingDeviceToken();
   } else { // User is signed out!
     // Hide user's profile and sign-out button.
-    this.userName.setAttribute('hidden', 'true');
-    this.userPic.setAttribute('hidden', 'true');
-    this.signOutButton.setAttribute('hidden', 'true');
+    this.userName.prop('hidden', true);
+    this.userPic.prop('hidden', true);
+    this.signOutButton.prop('hidden', true);
 
     //We remove currently existing messages.
     this.removeMessages();
     // Show sign-in button.
-    this.signInButton.removeAttribute('hidden');
+    this.signInButton.prop('hidden', false);
   }
 };
 
