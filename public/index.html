@@ -22,7 +22,7 @@
               <i class="material-icons">menu</i>
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
                     <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
@@ -31,7 +31,7 @@
              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
-              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
                     <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
