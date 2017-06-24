@@ -2,6 +2,9 @@
 var CACHE_NAME = 'my-site-cache-v1';
 var urlsToCache = [
   '/index.html',
+  '/chatroom.html',
+  '/confirmDebt.html',
+  '/profile.html',
   '/css/materialize.min.css',
   '/css/app.css',
   '/fonts/roboto/Roboto-Bold.woff',
@@ -18,6 +21,9 @@ var urlsToCache = [
   '/js/jquery-3.2.1.min.js',
   '/js/materialize.min.js',
   '/js/app.js',
+  '/js/vue.min.js',
+  '/js/q.js',
+  '/js/main.js',
   '/img/lannister.png'
 ];
 

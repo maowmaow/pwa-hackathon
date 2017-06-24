@@ -15,7 +15,32 @@
   <body>
     <div id="app">
       <nav class="nav-extended teal lighten-3">
-           <div id="includedHeaderMenu"></div>
+         <div class="nav-wrapper">
+            <a href="index.html" class="brand-logo">
+                <img class="valign-wrapper" src="img/ic_launcher2.png" style="width: 60px;height: 60px;">
+            </a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse">
+              <i class="material-icons">menu</i>
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+             <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+              <li><a href="#">Notification</a></li>
+              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
+            </ul>
+          </div>
            <div class="nav-content">
               <ul class="tabs tabs-transparent">
                 <li class="tab"><a class="active" href="#test1">Debt Description</a></li>
@@ -76,10 +101,6 @@
     <script src="js/app.js"></script>
 
     <script> 
-      $(function(){
-        $("#includedHeaderMenu").load("headerMenu.html"); 
-      });
-
       var app = new Vue({
           el : '#app',
           data : {
@@ -108,8 +129,17 @@
             datastore.updateDebtStatus(this.debtDetail.id, 'reject').then(function() {
             window.location = "index.html";
             });
-          }
-        }
+          },
+			logout: function() {
+				firebase.auth().signOut();
+				$(".button-collapse").sideNav('hide');
+			}
+        },
+		computed: {
+			isLoggedIn: function() {
+				return !!this.user.uid;
+			}
+		}
       });
 
       firebase.auth().onAuthStateChanged(function(user) {
@@ -128,7 +158,9 @@
           var debtCardId = getQueryVariable("id");
           datastore.getDebt(debtCardId)
           .then(function(card){
-            console.log(card);
+            if (!card)
+            	return new Error('debt not found id: ' + debtCardId);
+            
             card.id = debtCardId;
             app.debtDetail = card;
             return datastore.getProfile(card.lender);
