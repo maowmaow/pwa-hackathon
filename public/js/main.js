@@ -14,24 +14,15 @@ function DebtRemind() {
   this.submitImageButton = document.getElementById('submitImage');
   this.imageForm = document.getElementById('image-form');
   this.mediaCapture = document.getElementById('mediaCapture');
-  this.userPic = document.getElementById('user-pic');
-  this.userName = document.getElementById('user-name');
-  this.signInButton = document.getElementById('sign-in');
-  this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
 
   // Saves message on form submit.
-  
-  this.signOutButton.addEventListener('click', this.signOut.bind(this));
-  this.signInButton.addEventListener('click', this.signIn.bind(this));
 
   // Toggle for the button.
   
 
 
-  if(filename == '/index.html'){
-    
-  }else{
+  if(filename == '/chatroom.html'){
     this.messageForm.addEventListener('submit', this.saveMessage.bind(this));
     var buttonTogglingHandler = this.toggleButton.bind(this);
     this.messageInput.addEventListener('keyup', buttonTogglingHandler);
@@ -64,7 +55,7 @@ DebtRemind.prototype.removeMessages = function(){
 // Loads chat messages history and listens for upcoming ones.
 DebtRemind.prototype.loadMessages = function() {
   // Reference to the /messages/ database path.
-  if(filename == '/index.html'){
+  if(filename == '/index.html' || filename == '/'){
     this.messagesRef = this.database.ref('messages');
   }
   if(filename == '/chatroom.html'){
@@ -210,33 +201,14 @@ DebtRemind.prototype.onAuthStateChanged = function(user) {
     var profilePicUrl = user.photoURL;
     var userName = user.displayName;  
 
-    // Set the user's profile pic and name.
-    this.userPic.style.backgroundImage = 'url(' + profilePicUrl + ')';
-    this.userName.textContent = userName;
-
-    // Show user's profile and sign-out button.
-    this.userName.removeAttribute('hidden');
-    this.userPic.removeAttribute('hidden');
-    this.signOutButton.removeAttribute('hidden');
-
-    // Hide sign-in button.
-    this.signInButton.setAttribute('hidden', 'true');
-
     // We load currently existing messages.
     this.loadMessages();
 
     // We save the Firebase Messaging Device token and enable notifications.
     this.saveMessagingDeviceToken();
   } else { // User is signed out!
-    // Hide user's profile and sign-out button.
-    this.userName.setAttribute('hidden', 'true');
-    this.userPic.setAttribute('hidden', 'true');
-    this.signOutButton.setAttribute('hidden', 'true');
-
     //We remove currently existing messages.
     this.removeMessages();
-    // Show sign-in button.
-    this.signInButton.removeAttribute('hidden');
   }
 };
 
