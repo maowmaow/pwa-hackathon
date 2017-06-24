@@ -111,8 +111,12 @@
               <form class="col s12">
                 <div class="row">
                   <div class="input-field">
-                    <input type="text" id="autocomplete-input" class="autocomplete" v-model="debtForm.borrower">
-                    <label for="autocomplete-input">Name</label>
+                    <a class='dropdown-button btn' href='#' data-activates='borrower-dropdown' id="borrower-btn">Select Borrower</a>
+                    <ul id='borrower-dropdown' class='dropdown-content'>
+					    <li v-for="(c, cid) in contacts"><a v-on:click="selectBorrower(cid)">{{c.displayName}}</a></li>
+					</ul>
+                    <label for="autocomplete-input" class="active">Name</label>
+                    <input type="hidden" id="borrower">
                   </div>
                   <div class="input-field">
                     <input id="icon_telephone" type="number" class="validate" v-model="debtForm.amount">
@@ -202,7 +206,8 @@
 				user: {},
 				profile: {},
 				debtForm: {},
-				debts: {}
+				debts: {},
+				contacts: {}
 			},
 			methods: {
 				login: function() {
@@ -214,9 +219,27 @@
 					$(".button-collapse").sideNav('hide');
 				},
 				addDebt: function() {
+					var borrower = $('#borrower').val();
 					var dueDate = $('#duedate').val();
-					var debt = { lender: this.user.uid, borrower: this.debtForm.borrower, amount: this.debtForm.amount, dueDate: dueDate, description: this.debtForm.description };
+					var desc = this.debtForm.description || '';
+					
+					if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
+						return;
+					}
+					
+					var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
 					datastore.addDebt(debt);
+					
+					$('#borrower-btn').text('SELECT BORROWER');
+					$('#borrower').val('');
+					$('#duedate').val('');
+					this.debtForm = {};
+				},
+				selectBorrower: function(cid) {
+					var contact = this.contacts[cid];
+					console.log('select borrower', contact);
+					$('#borrower-btn').text(contact.displayName);
+					$('#borrower').val(cid);
 				}
 			},
 			computed: {
@@ -251,6 +274,11 @@
 					datastore.watchDashboard(userData.uid, function(data) {
 						console.log('dashboard update', data);
 						app.debts = data;
+					});
+					datastore.watchProfile(function(members) {
+						var contacts = $.extend({}, members);
+						delete contacts[userData.uid];
+						app.contacts = contacts;
 					});
 				});
 			}

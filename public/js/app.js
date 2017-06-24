@@ -100,6 +100,14 @@ var datastore = (function(firebase) {
 		return deferred.promise;
 	}
 	
+	function watchProfile(callback) {
+		return database.ref('member').on('value', function(snapshot) {
+			if (callback) {
+				callback(snapshot.val());
+			}
+		});
+	}
+	
 	// return promise
 	function getProfile(uid) {
 		return database.ref('member/' + uid).once('value').then(function(snapshot) {
@@ -118,6 +126,7 @@ var datastore = (function(firebase) {
 	
 	return {
 		watchDashboard: watchDashboard,
+		watchProfile: watchProfile,
 		addDebt: addDebt,
 		addMember: addMember,
 		getProfile: getProfile,
