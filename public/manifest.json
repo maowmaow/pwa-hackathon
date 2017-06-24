@@ -1,6 +1,6 @@
 {
   "name": "change-me",
-  "short_name": "change-me",
+  "short_name": "TestApp",
   "scope": "./",
   "start_url": "index.html",
   "display": "standalone",
