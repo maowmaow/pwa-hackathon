@@ -193,6 +193,7 @@
 					firebase.auth().signInWithPopup(provider);
 				},
 				logout: function() {
+					firebase.auth().signOut();
 				}
 			},
 			computed: {
