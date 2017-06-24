@@ -69,6 +69,10 @@ var datastore = (function(firebase) {
 		});
 	}
 	
+	function deleteDebt(debtId) {
+		return database.ref('debts/' + debtId).remove();
+	}
+	
 	function addMember(user) {
 		console.log('begin: add member');
 		var deferred = Q.defer();
@@ -131,7 +135,8 @@ var datastore = (function(firebase) {
 		addMember: addMember,
 		getProfile: getProfile,
 		updateProfile: updateProfile,
-		updateDebtStatus: updateDebtStatus
+		updateDebtStatus: updateDebtStatus,
+		deleteDebt: deleteDebt
 	}
 	
 })(firebase);
