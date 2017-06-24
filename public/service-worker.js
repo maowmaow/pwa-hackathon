@@ -24,7 +24,9 @@ var urlsToCache = [
   '/js/vue.min.js',
   '/js/q.js',
   '/js/main.js',
-  '/img/lannister.png'
+  '/img/ic_launcher_c512.png',
+  '/img/ic_launcher.png',
+  '/img/ic_launcher2.png'
 ];
 
 self.addEventListener('install', function(event) {

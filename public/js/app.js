@@ -142,7 +142,6 @@ var datastore = (function(firebase) {
 	
 })(firebase);
 
-
 var helper = (function() {
 
 	function getQueryVariable(variable){
