@@ -43,8 +43,19 @@
     bottom: 10px;
 }
 
-
 /*      Profile Page     */
 .my-profile .card-title{
    color:#338D83;
+}
+
+.fixed-action-btn.horizontal ul{
+    right: 15px;
+}
+.modal{
+  max-height: 90%;
+}
+@media only screen and (max-width: 992px){
+  .modal {
+    width: 100%;
+  }
 }
