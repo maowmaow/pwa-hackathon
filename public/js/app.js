@@ -135,6 +135,7 @@ var datastore = (function(firebase) {
 		addMember: addMember,
 		getProfile: getProfile,
 		updateProfile: updateProfile,
+		getDebt: getDebt,
 		updateDebtStatus: updateDebtStatus,
 		deleteDebt: deleteDebt
 	}
