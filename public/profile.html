@@ -109,9 +109,8 @@
 				app.user = userData;
 				
 				var uid = userData.uid;
-				datastore.getProfile(uid).then(function(snapshot) {
-					console.log(snapshot.val());
-					app.profile = snapshot.val();
+				datastore.getProfile(uid).then(function(profile) {
+					app.profile = profile;
 				});
 			}
 		});

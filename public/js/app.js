@@ -45,7 +45,7 @@ var datastore = (function(firebase) {
 	}
 	
 	function addDebt(debt) {
-		debt.paid = false;
+		debt.status = 'pending';
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
@@ -53,13 +53,28 @@ var datastore = (function(firebase) {
 		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
 	}
 	
+	function getDebt(debtId) {
+		return database.ref('debts/' + debtId).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
+	}
+	
+	function updateDebtStatus(debtId, newStatus) {
+		return getDebt(debtId).then(function(debt) {
+			return Q.all([
+				database.ref('debts/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.lender + '/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.borrower + '/' + debtId + '/status').set(newStatus)
+			]);
+		});
+	}
+	
 	function addMember(user) {
 		console.log('begin: add member');
 		var deferred = Q.defer();
 		
-		getProfile(user.uid).then(function(snapshot) {
-			
-			var profile = snapshot.val();
+		getProfile(user.uid).then(function(profile) {
+
 			if (profile != null) {
 				console.log('profile already exists');
 				updatePicture(user.uid, user.photoURL).then(function() {
@@ -87,7 +102,9 @@ var datastore = (function(firebase) {
 	
 	// return promise
 	function getProfile(uid) {
-		return database.ref('member/' + uid).once('value');
+		return database.ref('member/' + uid).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
 	}
 	
 	// uid = string, profile = { displayName, email, bankAccount }
@@ -104,7 +121,8 @@ var datastore = (function(firebase) {
 		addDebt: addDebt,
 		addMember: addMember,
 		getProfile: getProfile,
-		updateProfile: updateProfile
+		updateProfile: updateProfile,
+		updateDebtStatus: updateDebtStatus
 	}
 	
 })(firebase);
