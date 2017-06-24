@@ -62,14 +62,17 @@ var datastore = (function(firebase) {
 			var profile = snapshot.val();
 			if (profile != null) {
 				console.log('profile already exists');
-				deferred.resolve(profile);
+				updatePicture(user.uid, user.photoURL).then(function() {
+					deferred.resolve(profile);
+				})
 				return;
 			}
 			
 			console.log('profile not exists');
 			var newProfile = {
 					displayName: user.displayName,
-			    	email: user.email
+			    	email: user.email,
+			    	photoURL: user.photoURL
 				};
 			
 			updateProfile(user.uid, newProfile).then(function() {
@@ -90,6 +93,10 @@ var datastore = (function(firebase) {
 	// uid = string, profile = { displayName, email, bankAccount }
 	function updateProfile(uid, profile) {
 		return database.ref('member/' + uid).set(profile);
+	}
+	
+	function updatePicture(uid, photoURL) {
+		return database.ref('member/' + uid + '/photoURL').set(photoURL);
 	}
 	
 	return {
