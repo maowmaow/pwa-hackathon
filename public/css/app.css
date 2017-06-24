@@ -42,6 +42,12 @@
     top: inherit;
     bottom: 10px;
 }
+
+/*      Profile Page     */
+.my-profile .card-title{
+   color:#338D83;
+}
+
 .fixed-action-btn.horizontal ul{
     right: 15px;
 }
