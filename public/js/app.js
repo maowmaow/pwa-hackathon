@@ -63,33 +63,47 @@ var datastore = (function(firebase) {
 		console.log('begin: add member');
 		var deferred = Q.defer();
 		
-		var memberRef = database.ref('member/' + user.uid);
-		memberRef.once('value').then(function(snapshot) {
-			if (snapshot.val() != null) {
-				console.log('hello');
-				deferred.reject(new Error("user already exists"));
+		getProfile(user.uid).then(function(snapshot) {
+			
+			var profile = snapshot.val();
+			if (profile != null) {
+				console.log('profile already exists');
+				deferred.resolve(profile);
 				return;
 			}
-			console.log('begin: _add member');
-			return _addMember(user);
-		}).then(function() {
-			deferred.resolve('success');
-		});
+			
+			console.log('profile not exists');
+			var newProfile = {
+					displayName: user.displayName,
+			    	email: user.email
+				};
+			
+			updateProfile(user.uid, newProfile).then(function() {
+				deferred.resolve(newProfile);
+			}, function(err) {
+				deferred.reject(err);
+			});
+		})
 		
 		return deferred.promise;
 	}
 	
-	function _addMember(user) {
-		return database.ref('member/' + user.uid).set({
-	    	name: user.displayName,
-	    	email: user.email
-	    });
+	// return promise
+	function getProfile(uid) {
+		return database.ref('member/' + uid).once('value');
+	}
+	
+	// uid = string, profile = { displayName, email, bankAccount }
+	function updateProfile(uid, profile) {
+		return database.ref('member/' + uid).set(profile);
 	}
 	
 	return {
 		loadDashboard: loadDashboard,
 		addDebt: addDebt,
-		addMember: addMember
+		addMember: addMember,
+		getProfile: getProfile,
+		updateProfile: updateProfile
 	}
 	
 })(firebase);
