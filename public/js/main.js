@@ -261,6 +261,7 @@ if(filename == '/chatroom.html'){
       '<div class="people"><div class="pic"></div>' +
       '<div class="name"></div></div>' +
       '<div class="message"></div>' +
+      '<time>18.29</time>' +
       // '<div class="timeago" style="float: right;"></div>' +
     '</div>';
 }
