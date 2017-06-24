@@ -253,8 +253,9 @@ DebtRemind.prototype.onAuthStateChanged = function(user) {
 
     //Insert User to DB
     var currentUserToDb = this.auth.currentUser;
-    this.database.ref('member').push({
-      name: currentUserToDb.displayName,
+    this.database.ref('member/' + user.uid).set({
+    	name: user.displayName,
+    	email: user.email
     })
 
     // We save the Firebase Messaging Device token and enable notifications.
