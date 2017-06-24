@@ -34,29 +34,19 @@ var datastore = (function(firebase) {
 	firebase.initializeApp(config);
 	var database = firebase.database();
 	
-	function loadDashboard() {
-		var currentUser = firebase.auth().currentUser;
-		if (currentUser == null) {
-			console.log('load dashboard failed. unauthenticated user.')
-			return;
-		}
-		
-		var uid = currentUser.providerData.uid;
+	function watchDashboard(uid, callback) {
 		console.log('begin: load dashboard for user', uid);
 		
-		var dashboard = database.ref('dashboard/' + uid);
-		dashboard.on('value', function(snapshot) {
-			console.log(snapshot.val());
-		});
+		database.ref('dashboard/' + uid).on('value', callback);
 	}
 	
-	function addDebt(lender, borrower, amount) {
-		var debt = { lender: lender, borrower: borrower, amount: amount, paid: false };
+	function addDebt(debt) {
+		debt.paid = false;
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
-		database.ref('dashboard/' + lender + '/' + key).set(debt);
-		database.ref('dashboard/' + borrower + '/' + key).set(debt);
+		database.ref('dashboard/' + debt.lender + '/' + key).set(debt);
+		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
 	}
 	
 	function addMember(user) {
@@ -99,7 +89,7 @@ var datastore = (function(firebase) {
 	}
 	
 	return {
-		loadDashboard: loadDashboard,
+		watchDashboard: watchDashboard,
 		addDebt: addDebt,
 		addMember: addMember,
 		getProfile: getProfile,

@@ -21,10 +21,10 @@
     <script src="js/app.js"></script>
     <script>
     datastore.authenticate().then(function(result) {
-		  var token = result.credential.accessToken;
+			  var token = result.credential.accessToken;
 		  var user = result.user;
 		  console.log('user:', user);
-		  datastore.addDebt('cherry', 'tee', 4500);
+		  datastore.addDebt();
 		}).catch(function(error) {
 		  var errorCode = error.code;
 		  var errorMessage = error.message;
