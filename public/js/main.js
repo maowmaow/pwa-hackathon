@@ -56,7 +56,7 @@ DebtRemind.prototype.initFirebase = function() {
 };
 
 DebtRemind.prototype.removeMessages = function(){
-  $( ".container" ).empty();
+  $( "#main" ).empty();
 };
 
 // Loads chat messages history and listens for upcoming ones.
