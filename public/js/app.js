@@ -37,7 +37,11 @@ var datastore = (function(firebase) {
 	function watchDashboard(uid, callback) {
 		console.log('begin: load dashboard for user', uid);
 		
-		database.ref('dashboard/' + uid).on('value', callback);
+		database.ref('dashboard/' + uid).on('value', function(snapshot) {
+			if (callback) {
+				callback(snapshot.val());
+			}
+		});
 	}
 	
 	function addDebt(debt) {

@@ -59,7 +59,7 @@
           <ul class="collection">
           	<li is="debt-card"
           		v-for="(debt, key) in debts"
-            	v-if="debt.lender === user.uid"
+          		v-if="debt.lender === user.uid"
             	v-bind:key="key"
             	v-bind:debt="debt"
             	v-bind:user="user"></li>
@@ -136,7 +136,7 @@
 	<script type="x-template" id="debt-card-template">
 			<li class="collection-item avatar z-depth-1 item-green" v-bind:class="{ 'item-green': (debt.lender === user.uid), 'item-red': (debt.borrower === user.uid) }">
               <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">{{user.uid === debt.lender? debt.borrower : debt.lender}}</span>
+              <span class="title">{{contactData.displayName}}</span>
               <p>{{debt.description}}<br>
                  Due : {{debt.dueDate}}
               </p>
@@ -144,7 +144,7 @@
                 <i class="material-icons">more_vert</i>
                 <ul>
                   <li><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
+                  <li v-if="contactData.telephone"><a class="btn-floating light-blue darken-3" v-bind:href="'tel://' + contactData.telephone"><i class="material-icons">phone</i></a></li>
                   <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
                 </ul>
               </div>
@@ -169,7 +169,24 @@
 			'debt': { type: Object, default: function() { return {}; } }, 
 			'user': { type: Object, default: function() { return {}; } }
 		},
-		template: '#debt-card-template'
+		data: function() {
+			return {
+				contactData: {}
+			};
+		},
+		template: '#debt-card-template',
+		mounted: function() {
+			console.log('debtCard:contact', this.contact);
+			var self = this;
+			datastore.getProfile(this.contact).then(function(snapshot) {
+				self.contactData = snapshot.val();
+			});
+		},
+		computed: {
+			contact: function() {
+				return (this.debt.lender === this.user.uid)? this.debt.borrower : this.debt.lender;
+			}
+		}
 	  }
 		var app = new Vue({
 			el : '#app',
@@ -177,20 +194,7 @@
 				user: {},
 				profile: {},
 				debtForm: {},
-				debts: {},
-				borrowMeList: []
-			},
-			watch: {
-				profile: function(newValue) {
-					var self = this;
-					
-					if (newValue && newValue.bankAccount) {
-						datastore.watchDashboard(this.user.uid, function(snapshot) {
-							console.log('dashboard update');
-							self.debts = snapshot.val();
-						});
-					}
-				}
+				debts: {}
 			},
 			methods: {
 				login: function() {
@@ -227,12 +231,19 @@
 				console.log('user', userData);
 				app.user = userData;
 				
-				datastore.addMember(userData).then(function(profile) {
+				datastore.addMember(userData)
+				.then(function(profile) {
 					if (!profile.bankAccount) {
 						window.location = 'profile.html';
 						return;
 					}
 					app.profile = profile;
+				})
+				.then(function() {
+					datastore.watchDashboard(userData.uid, function(data) {
+						console.log('dashboard update', data);
+						app.debts = data;
+					});
 				});
 			}
 		});
