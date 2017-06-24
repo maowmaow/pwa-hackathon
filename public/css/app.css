@@ -306,13 +306,7 @@ footer {
     -moz-user-select: none;
     -ms-user-select: none;
 }
-.chat time:before{
-    content:"\f017";
-    color: #ddd;
-    font-family: FontAwesome;
-    display: inline-block;
-    margin-right: 4px;
-}
+
 #submitImage{
     padding: 0;
 }
