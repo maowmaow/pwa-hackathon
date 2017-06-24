@@ -32,14 +32,17 @@ html {
 .collection{
     border: none;
 }
-.collection .collection-item{
+.collection .collection-item {
     margin: .5rem 0 1rem 0;
 }
-.collection .collection-item.item-red{
+.collection .collection-item.item-red {
     border-left: 4px solid #f44336;
 }
-.collection .collection-item.item-green{
+.collection .collection-item.item-green {
     border-left: 4px solid #4CAF50;
+}
+.collection .collection-item.item-pending {
+    background-color: #eee;
 }
 .collection .collection-item .secondary-content.top{
     right: 5px;

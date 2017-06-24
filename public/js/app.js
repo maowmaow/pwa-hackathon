@@ -34,48 +34,64 @@ var datastore = (function(firebase) {
 	firebase.initializeApp(config);
 	var database = firebase.database();
 	
-	function loadDashboard() {
-		var currentUser = firebase.auth().currentUser;
-		if (currentUser == null) {
-			console.log('load dashboard failed. unauthenticated user.')
-			return;
-		}
-		
-		var uid = currentUser.providerData.uid;
+	function watchDashboard(uid, callback) {
 		console.log('begin: load dashboard for user', uid);
 		
-		var dashboard = database.ref('dashboard/' + uid);
-		dashboard.on('value', function(snapshot) {
-			console.log(snapshot.val());
+		database.ref('dashboard/' + uid).on('value', function(snapshot) {
+			if (callback) {
+				callback(snapshot.val());
+			}
 		});
 	}
 	
-	function addDebt(lender, borrower, amount) {
-		var debt = { lender: lender, borrower: borrower, amount: amount, paid: false };
+	function addDebt(debt) {
+		debt.status = 'pending';
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
-		database.ref('dashboard/' + lender + '/' + key).set(debt);
-		database.ref('dashboard/' + borrower + '/' + key).set(debt);
+		database.ref('dashboard/' + debt.lender + '/' + key).set(debt);
+		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
+	}
+	
+	function getDebt(debtId) {
+		return database.ref('debts/' + debtId).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
+	}
+	
+	function updateDebtStatus(debtId, newStatus) {
+		return getDebt(debtId).then(function(debt) {
+			return Q.all([
+				database.ref('debts/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.lender + '/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.borrower + '/' + debtId + '/status').set(newStatus)
+			]);
+		});
+	}
+	
+	function deleteDebt(debtId) {
+		return database.ref('debts/' + debtId).remove();
 	}
 	
 	function addMember(user) {
 		console.log('begin: add member');
 		var deferred = Q.defer();
 		
-		getProfile(user.uid).then(function(snapshot) {
-			
-			var profile = snapshot.val();
+		getProfile(user.uid).then(function(profile) {
+
 			if (profile != null) {
 				console.log('profile already exists');
-				deferred.resolve(profile);
+				updatePicture(user.uid, user.photoURL).then(function() {
+					deferred.resolve(profile);
+				})
 				return;
 			}
 			
 			console.log('profile not exists');
 			var newProfile = {
 					displayName: user.displayName,
-			    	email: user.email
+			    	email: user.email,
+			    	photoURL: user.photoURL
 				};
 			
 			updateProfile(user.uid, newProfile).then(function() {
@@ -88,9 +104,19 @@ var datastore = (function(firebase) {
 		return deferred.promise;
 	}
 	
+	function watchProfile(callback) {
+		return database.ref('member').on('value', function(snapshot) {
+			if (callback) {
+				callback(snapshot.val());
+			}
+		});
+	}
+	
 	// return promise
 	function getProfile(uid) {
-		return database.ref('member/' + uid).once('value');
+		return database.ref('member/' + uid).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
 	}
 	
 	// uid = string, profile = { displayName, email, bankAccount }
@@ -98,12 +124,19 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid).set(profile);
 	}
 	
+	function updatePicture(uid, photoURL) {
+		return database.ref('member/' + uid + '/photoURL').set(photoURL);
+	}
+	
 	return {
-		loadDashboard: loadDashboard,
+		watchDashboard: watchDashboard,
+		watchProfile: watchProfile,
 		addDebt: addDebt,
 		addMember: addMember,
 		getProfile: getProfile,
-		updateProfile: updateProfile
+		updateProfile: updateProfile,
+		updateDebtStatus: updateDebtStatus,
+		deleteDebt: deleteDebt
 	}
 	
 })(firebase);

@@ -22,7 +22,7 @@
               <i class="material-icons">menu</i>
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
                     <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
@@ -31,7 +31,7 @@
              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
-              <li v-if="isLoggedIn"><a href="#" class="valign-wrapper user">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
                     <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
@@ -57,157 +57,36 @@
         <div id="tap1" class="col s12">
           <!-- tab 1 content -->
           <ul class="collection">
-            <li class="collection-item avatar z-depth-1 item-green">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Tee</span>
-              <p>First Line <br>
-                 Due : 24 Jun 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content green-text bottom">฿ 6,950</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-green">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Jay</span>
-              <p>First Line <br>
-                 Due : 01 Aug 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content green-text bottom">฿ 6,950</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-green">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Sawaou</span>
-              <p>First Line <br>
-                 Due : 29 Oct 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content green-text bottom">฿ 6,950</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-green">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Cherry</span>
-              <p>First Line <br>
-                 Due : 13 Dec 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content green-text bottom">฿ 6,950</span>
-            </li>
+          	<li is="debt-card"
+          		v-for="(debt, key) in debts"
+          		v-if="debt.lender === user.uid"
+            	v-bind:key="key"
+            	v-bind:debt-id="key"
+            	v-bind:debt="debt"
+            	v-bind:user="user"></li>
           </ul>
           <!-- end tab 1 content -->
         </div>
         <div id="tap2" class="col s12">
           <ul class="collection">
-            <li class="collection-item avatar z-depth-1 item-red">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Cherry</span>
-              <p>First Line <br>
-                 Due : 24 Jun 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content red-text bottom">฿ 540</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-red">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Tee</span>
-              <p>First Line <br>
-                 Due : 01 Aug 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content red-text bottom">฿ 1,650</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-red">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Jay</span>
-              <p>First Line <br>
-                 Due : 29 Oct 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content red-text bottom">฿ 25,989</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-red">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Sawaou</span>
-              <p>First Line <br>
-                 Due : 13 Dec 2017
-              </p>
-              <div class="secondary-content top fixed-action-btn horizontal">
-                <i class="material-icons">more_vert</i>
-                <ul>
-                  <li><a class="btn-floating light-blue darken-3"><i class="material-icons">phone</i></a></li>
-                  <li><a class="btn-floating red darken-3"><i class="material-icons">chat_bubble</i></a></li>
-                </ul>
-              </div>
-              <span class="secondary-content red-text bottom">฿ 1,000</span>
-            </li>
+            <li is="debt-card"
+          		v-for="(debt, key) in debts"
+            	v-if="debt.borrower === user.uid"
+            	v-bind:key="key"
+            	v-bind:debt-id="key"
+            	v-bind:debt="debt"
+            	v-bind:user="user"></li>
           </ul>
         </div>
         <div id="tap3" class="col s12">
           <ul class="collection">
-            <li class="collection-item avatar z-depth-1 item-red">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Jay</span>
-              <p>First Line <br>
-                 Due : 24 Jun 2017 <br>
-                 End : 29 May 2017
-              </p>
-              <span class="secondary-content red-text bottom">฿ 955</span>
-            </li>
-            <li class="collection-item avatar z-depth-1 item-green">
-              <img src="http://supritmedicals.com/img/thumb.png" alt="" class="circle">
-              <span class="title">Sawaou</span>
-              <p>First Line <br>
-                 Due : 01 May 2017 <br>
-                 End : 02 May 2017
-              </p>
-              <span class="secondary-content green-text bottom">฿ 5,875</span>
-            </li>
+            <li is="debt-card"
+          		v-for="(debt, key) in debts"
+            	v-if="debt.paid === true"
+            	v-bind:key="key"
+            	v-bind:debt-id="key"
+            	v-bind:debt="debt"
+            	v-bind:user="user"></li>
           </ul>
         </div>
         <!-- Add Button -->
@@ -232,11 +111,15 @@
               <form class="col s12">
                 <div class="row">
                   <div class="input-field">
-                    <input type="text" id="autocomplete-input" class="autocomplete">
-                    <label for="autocomplete-input">Name</label>
+                    <a class='dropdown-button btn' href='#' data-activates='borrower-dropdown' id="borrower-btn">Select Borrower</a>
+                    <ul id='borrower-dropdown' class='dropdown-content'>
+					    <li v-for="(c, cid) in contacts"><a v-on:click="selectBorrower(cid)">{{c.displayName}}</a></li>
+					</ul>
+                    <label for="autocomplete-input" class="active">Name</label>
+                    <input type="hidden" id="borrower">
                   </div>
                   <div class="input-field">
-                    <input id="icon_telephone" type="number" class="validate">
+                    <input id="icon_telephone" type="number" class="validate" v-model="debtForm.amount">
                     <label for="icon_telephone">Amount</label>
                   </div>
                   <div class="">
@@ -244,7 +127,7 @@
                     <input id="duedate" type="date" class="datepicker">
                   </div>
                   <div class="input-field">
-                    <textarea id="textarea1" class="materialize-textarea"></textarea>
+                    <textarea id="textarea1" class="materialize-textarea" v-model="debtForm.description"></textarea>
                     <label for="textarea1">Description</label>
                   </div>
                 </div>
@@ -252,13 +135,31 @@
             </div>
           </div>
           <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">ADD</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" v-on:click="addDebt">ADD</a>
           </div>
         </div>
-
     </div>
     <!-- script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script -->
-
+	<script type="x-template" id="debt-card-template">
+			<li class="collection-item avatar z-depth-1" 
+				v-bind:class="{ 'item-green': (debt.lender === user.uid), 'item-red': (debt.borrower === user.uid), 'item-pending': (debt.status == 'pending') }">
+              <img v-bind:src="contactData.photoURL" alt="" class="circle">
+              <span class="title">{{contactData.displayName}}</span>
+              <p>{{debt.description}}<br>
+                 Due : {{debt.dueDate}}
+              </p>
+              <div class="secondary-content top fixed-action-btn horizontal">
+                <i class="material-icons">more_vert</i>
+                <ul>
+                  <li v-if="debt.status === 'active' && debt.lender === user.uid"><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
+                  <li v-if="contactData.telephone"><a class="btn-floating light-blue darken-3" v-bind:href="'tel:' + contactData.telephone"><i class="material-icons">phone</i></a></li>
+                  <li><a class="btn-floating red darken-3" v-bind:href="'chatroom.html?id=' + debtId"><i class="material-icons">chat_bubble</i></a></li>
+                </ul>
+              </div>
+              <span class="secondary-content green-text bottom">฿ {{debt.amount}}</span>
+            </li>
+	</script>
+		
     <script src="js/firebase.js"></script>
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/materialize.min.js"></script>
@@ -270,11 +171,43 @@
 	  $(function(){
         $("#includedHeaderMenu").load("headerMenu.html"); 
       });
+	  
+	  var debtCard = {
+		props: {
+			'debtId': { type: String },
+			'debt': { type: Object, default: function() { return {}; } }, 
+			'user': { type: Object, default: function() { return {}; } }
+		},
+		data: function() {
+			return {
+				contactData: {}
+			};
+		},
+		template: '#debt-card-template',
+		mounted: function() {
+			console.log('debtCard:contact', this.contact);
+			var self = this;
+			datastore.getProfile(this.contact).then(function(profile) {
+				if (!profile.photoURL || profile.photoURL.trim().length == 0) {
+					profile.photoURL = "http://supritmedicals.com/img/thumb.png";
+				}
+				self.contactData = profile;
+			});
+		},
+		computed: {
+			contact: function() {
+				return (this.debt.lender === this.user.uid)? this.debt.borrower : this.debt.lender;
+			}
+		}
+	  }
 		var app = new Vue({
 			el : '#app',
 			data : {
 				user: {},
-				profile: {}
+				profile: {},
+				debtForm: {},
+				debts: {},
+				contacts: {}
 			},
 			methods: {
 				login: function() {
@@ -284,12 +217,38 @@
 				logout: function() {
 					firebase.auth().signOut();
 					$(".button-collapse").sideNav('hide');
+				},
+				addDebt: function() {
+					var borrower = $('#borrower').val();
+					var dueDate = $('#duedate').val();
+					var desc = this.debtForm.description || '';
+					
+					if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
+						return;
+					}
+					
+					var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
+					datastore.addDebt(debt);
+					
+					$('#borrower-btn').text('SELECT BORROWER');
+					$('#borrower').val('');
+					$('#duedate').val('');
+					this.debtForm = {};
+				},
+				selectBorrower: function(cid) {
+					var contact = this.contacts[cid];
+					console.log('select borrower', contact);
+					$('#borrower-btn').text(contact.displayName);
+					$('#borrower').val(cid);
 				}
 			},
 			computed: {
 				isLoggedIn: function() {
 					return !!this.user.uid;
 				}
+			},
+			components: {
+				'debt-card': debtCard
 			}
 		});
 		
@@ -297,17 +256,30 @@
 			if (!user) {
 				// no user sign in
 				app.user = {};
+				app.profile = {};
 			} else {
 				var userData = user.providerData[0];
 				console.log('user', userData);
 				app.user = userData;
 				
-				datastore.addMember(userData).then(function(profile) {
+				datastore.addMember(userData)
+				.then(function(profile) {
 					if (!profile.bankAccount) {
 						window.location = 'profile.html';
 						return;
 					}
 					app.profile = profile;
+				})
+				.then(function() {
+					datastore.watchDashboard(userData.uid, function(data) {
+						console.log('dashboard update', data);
+						app.debts = data;
+					});
+					datastore.watchProfile(function(members) {
+						var contacts = $.extend({}, members);
+						delete contacts[userData.uid];
+						app.contacts = contacts;
+					});
 				});
 			}
 		});

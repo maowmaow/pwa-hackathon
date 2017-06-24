@@ -51,6 +51,12 @@
                                   <label for="bank_account" v-bind:class="{ active: profile.bankAccount }">Bank Account <span style="color:red">*</span></label>
                                 </div>
                               </div>
+                              <div class="row">
+                                <div class="input-field col s12">
+                                  <input id="telephone" type="tel" class="validate" v-model="profile.telephone">
+                                  <label for="telephone" v-bind:class="{ active: profile.telephone }">Telephone</label>
+                                </div>
+                              </div>
                             </form>
                           </div>
                           <a class="waves-effect waves-light btn-large" v-on:click="save">Submit</a>
@@ -103,9 +109,8 @@
 				app.user = userData;
 				
 				var uid = userData.uid;
-				datastore.getProfile(uid).then(function(snapshot) {
-					console.log(snapshot.val());
-					app.profile = snapshot.val();
+				datastore.getProfile(uid).then(function(profile) {
+					app.profile = profile;
 				});
 			}
 		});
