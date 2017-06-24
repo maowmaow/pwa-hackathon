@@ -5,11 +5,11 @@
   "start_url": "index.html",
   "display": "standalone",
   "orientation": "any",
-  "theme_color": "#c8c246",
-  "background_color": "#c8c246",
+  "theme_color": "#009688",
+  "background_color": "#009688",
   "icons": [{
-    "src": "img/lannister.png",
-    "sizes": "512x512",
+    "src": "img/ic_launcher.png",
+    "sizes": "384x384",
     "type": "image/png"
   }]
 }
