@@ -257,10 +257,10 @@ DebtRemind.resetMaterialTextfield = function(element) {
 // }
 if(filename == '/chatroom.html'){
   DebtRemind.MESSAGE_TEMPLATE =
-    '<div class="message-container comment">' +
-      '<div class="spacing"><div class="pic"></div></div>' +
+    '<div class="message-container chat">' +
+      '<div class="people"><div class="pic"></div>' +
+      '<div class="name"></div></div>' +
       '<div class="message"></div>' +
-      '<div class="name"></div>' +
       // '<div class="timeago" style="float: right;"></div>' +
     '</div>';
 }
@@ -291,6 +291,11 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
   }
   if (picUrl) {
     div.querySelector('.pic').style.backgroundImage = 'url(' + picUrl + ')';
+  }
+  if(name == this.auth.currentUser.displayName){
+    div.className += " other";
+  }else{
+    div.className += " self";
   }
   div.querySelector('.name').textContent = name;
   
@@ -352,10 +357,12 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
 
   // Added by IQ - Scroll to bottom when in comment page
   if(this.messagesRef.key == "messagesChat") {
-  	this.messageList.scrollTop = this.messageList.scrollHeight; 
+  	//this.messageList.scrollTop = this.messageList.scrollHeight; 
+    window.scrollTo(0,document.body.scrollHeight);
   }
   else{
-  	this.messageList.scrollTop = this.messageList.scrollHeight - this.messageList.scrollTop - this.messageList.scrollHeight;
+  	//this.messageList.scrollTop = this.messageList.scrollHeight - this.messageList.scrollTop - this.messageList.scrollHeight;
+    window.scrollTo(0,document.body.scrollHeight);
   }
   this.messageInput.focus();
 };
