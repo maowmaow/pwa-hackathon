@@ -59,11 +59,12 @@
           <ul class="collection">
           	<li is="debt-card"
           		v-for="(debt, key) in debts"
-          		v-if="debt.lender === user.uid"
+          		v-if="debt.lender === user.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"></li>
+            	v-bind:user="user"
+            	v-on:approve="approveDebt"></li>
           </ul>
           <!-- end tab 1 content -->
         </div>
@@ -71,7 +72,7 @@
           <ul class="collection">
             <li is="debt-card"
           		v-for="(debt, key) in debts"
-            	v-if="debt.borrower === user.uid"
+            	v-if="debt.borrower === user.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
@@ -82,7 +83,7 @@
           <ul class="collection">
             <li is="debt-card"
           		v-for="(debt, key) in debts"
-            	v-if="debt.paid === true"
+            	v-if="debt.status === 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
@@ -138,6 +139,16 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" v-on:click="addDebt">ADD</a>
           </div>
         </div>
+        
+        
+        <div id="approveModal" class="modal">
+          <div class="modal-content">
+            <p>Confirm that the debt is paid</p>
+          </div>
+          <div class="modal-footer">
+              <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" v-on:click="confirmApprove">Confirm</a>
+          </div>
+        </div>
     </div>
     <!-- script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script -->
 	<script type="x-template" id="debt-card-template">
@@ -151,7 +162,7 @@
               <div class="secondary-content top fixed-action-btn horizontal">
                 <i class="material-icons">more_vert</i>
                 <ul>
-                  <li v-if="debt.status === 'active' && debt.lender === user.uid"><a class="btn-floating green darken-3"><i class="material-icons">done_all</i></a></li>
+                  <li v-if="debt.status === 'active' && debt.lender === user.uid"><a class="btn-floating green darken-3" v-on:click="$emit('approve', debtId)"><i class="material-icons">done_all</i></a></li>
                   <li v-if="contactData.telephone"><a class="btn-floating light-blue darken-3" v-bind:href="'tel:' + contactData.telephone"><i class="material-icons">phone</i></a></li>
                   <li><a class="btn-floating red darken-3" v-bind:href="'chatroom.html?id=' + debtId"><i class="material-icons">chat_bubble</i></a></li>
                 </ul>
@@ -240,6 +251,15 @@
 					console.log('select borrower', contact);
 					$('#borrower-btn').text(contact.displayName);
 					$('#borrower').val(cid);
+				},
+				approveDebt: function(debtId) {
+					$('#approveModal').modal('open');
+					$('#approveModal').data('debt-id', debtId);
+				},
+				confirmApprove: function() {
+					var debtId = $('#approveModal').data('debt-id');
+					console.log('confirm approving debt', debtId);
+					datastore.updateDebtStatus(debtId, 'paid');
 				}
 			},
 			computed: {
