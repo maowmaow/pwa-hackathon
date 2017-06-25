@@ -71,14 +71,8 @@
                               </div>
                               <div class="row">
                                 <div class="input-field col s12">
-                                  <input id="bank_account" type="number" class="validate" v-model="profile.bankAccount" required="required" aria-required="true" v-bind:class="{ required: !profile.bankAccount }">
-                                  <label for="bank_account" v-bind:class="{ active: profile.bankAccount }">Bank Account <span style="color:red">*</span></label>
-                                </div>
-                              </div>
-                              <div class="row">
-                                <div class="input-field col s12">
-                                  <input id="telephone" type="tel" class="validate" v-model="profile.telephone">
-                                  <label for="telephone" v-bind:class="{ active: profile.telephone }">Telephone</label>
+                                  <input id="telephone" type="tel" class="validate" v-model="profile.telephone" required="required" aria-required="true" v-bind:class="{ required: !profile.telephone }">
+                                  <label for="telephone" v-bind:class="{ active: profile.telephone }">Telephone <span style="color:red">*</span></label>
                                 </div>
                               </div>
                             </form>
@@ -106,8 +100,7 @@
 			},
 			methods: {
 				save: function() {
-					console.log('profile', this.profile.bankAccount);
-					if (!this.profile.bankAccount) {
+					if (!this.profile.telephone) {
 						console.log('field is required');
 						return;
 					}

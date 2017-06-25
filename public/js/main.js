@@ -294,9 +294,6 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
 
   } else if (imageUri) { // If the message is an image.
     var act_image = document.createElement('img');
-    modal_image.addEventListener('load', function() {
-      this.messageList.scrollTop = this.messageList.scrollHeight;
-    }.bind(this));
     this.setImageUrl(imageUri, act_image);
     messageElement.innerHTML = '';
     messageElement.appendChild(act_image)

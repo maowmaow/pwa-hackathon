@@ -227,6 +227,9 @@
 			console.log('debtCard:contact', this.contact);
 			var self = this;
 			datastore.getProfile(this.contact).then(function(profile) {
+				if (!profile)
+					return;
+				
 				if (!profile.photoURL || profile.photoURL.trim().length == 0) {
 					profile.photoURL = "img/default-profile-pic.png";
 				}
@@ -315,19 +318,25 @@
 	datastore.watchLoginState(function(profile) {
 		if (!profile) {
 			app.profile = {};
-		} else {
-			app.profile = profile;
-			
-			datastore.watchDashboard(profile.uid, function(data) {
-				console.log('dashboard update', data);
-				app.debts = data;
-			});
-			datastore.watchProfile(function(members) {
-				var contacts = $.extend({}, members);
-				delete contacts[profile.uid];
-				app.contacts = contacts;
-			});	
+			return;
+		} 
+		
+		if (!profile.telephone) {
+			window.location = 'profile.html';
+			return;
 		}
+		
+		app.profile = profile;
+		
+		datastore.watchDashboard(profile.uid, function(data) {
+			console.log('dashboard update', data);
+			app.debts = data;
+		});
+		datastore.watchProfile(function(members) {
+			var contacts = $.extend({}, members);
+			delete contacts[profile.uid];
+			app.contacts = contacts;
+		});
 	});
 		
 	</script>
