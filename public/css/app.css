@@ -306,7 +306,7 @@ footer {
     -moz-user-select: none;
     -ms-user-select: none;
 }
-.chat.other time {
+.chat.self time {
     float: left;
 }
 
