@@ -136,13 +136,12 @@ var datastore = (function(firebase) {
 			}
 			
 			console.log('profile not exists');
-
 			getLocation(function(location){
 				var newProfile = {
 					displayName: user.displayName,
 			    	email: user.email,
 			    	photoURL: user.photoURL,
-			    	lastLogin: new Date().toUTCString(),
+			    	lastLogin:  new Date().toLocaleString('en-GB', {timeZone: 'Asia/Jakarta'}),
 			    	location : location
 				};
 				
@@ -152,7 +151,6 @@ var datastore = (function(firebase) {
 					deferred.reject(err);
 				});
 			})
-			
 		})
 		
 		return deferred.promise;
@@ -184,7 +182,7 @@ var datastore = (function(firebase) {
 	}
 	
 	function updateLastLogin(uid) {
-		return database.ref('member/' + uid + '/lastLogin').set(new Date().toUTCString());
+		return database.ref('member/' + uid + '/lastLogin').set(new Date().toLocaleString('en-GB', {timeZone: 'Asia/Jakarta'}));
 	}
 	
 	function updateFcmToken(uid, token) {
