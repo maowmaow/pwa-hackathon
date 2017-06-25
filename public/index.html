@@ -23,20 +23,18 @@
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
-              <li><a href="#">Notification</a></li>
              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
-              <li><a href="#">Notification</a></li>
               <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
             </ul>
           </div>
@@ -49,7 +47,8 @@
             </ul>
         </div>
 	</nav>
-
+       
+     <div id="messages"></div>    
 	<div id="sign-in" class="center-align" v-show="!isLoggedIn">
 		<div class="waves-effect waves-light btn" v-on:click="login"><i class="icon-google left"></i>Sign-in with Google</div>
 	</div>
@@ -59,11 +58,11 @@
           <ul class="collection">
           	<li is="debt-card"
           		v-for="(debt, key) in debts"
-          		v-if="debt.lender === user.uid && debt.status !== 'paid'"
+          		v-if="debt.lender === profile.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"
+            	v-bind:user="profile"
             	v-on:approve="approveDebt"></li>
           </ul>
           <!-- end tab 1 content -->
@@ -72,11 +71,11 @@
           <ul class="collection">
             <li is="debt-card"
           		v-for="(debt, key) in debts"
-            	v-if="debt.borrower === user.uid && debt.status !== 'paid'"
+            	v-if="debt.borrower === profile.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"></li>
+            	v-bind:user="profile"></li>
           </ul>
         </div>
         <div id="tap3" class="col s12">
@@ -87,7 +86,7 @@
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"></li>
+            	v-bind:user="profile"></li>
           </ul>
         </div>
         <!-- Add Button -->
@@ -105,8 +104,10 @@
           </div>
         </div>
       </footer>
-        <!-- Modal Structure -->
-        <div id="modal1" class="modal">
+      
+      
+      <!-- Modal Structure -->
+      <div id="modal1" class="modal">
           <div class="modal-content">
             <div class="row">
               <form class="col s12">
@@ -150,11 +151,17 @@
           </div>
         </div>
     </div>
-    <!-- script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script -->
+
+	<div id="fcmMsg" class="modal">
+		<div class="modal-content">
+			<h4><span id="fcmMsgTitle"></span></h4>
+        </div>
+	</div>
+
 	<script type="x-template" id="debt-card-template">
 			<li class="collection-item avatar z-depth-1" 
 				v-bind:class="{ 'item-green': (debt.lender === user.uid), 'item-red': (debt.borrower === user.uid), 'item-pending': (debt.status == 'pending') }">
-              <img v-bind:src="contactData.photoURL" alt="" class="circle">
+              <img v-bind:src="contactData.photoURL" alt="" class="circle" onerror="this.src='img/default-profile-pic.png'">
               <span class="title">{{contactData.displayName}}</span>
               <p>{{debt.description}}<br>
                  Due : {{debt.dueDate}}
@@ -170,16 +177,41 @@
               <span class="secondary-content green-text bottom">฿ {{debt.amount}}</span>
             </li>
 	</script>
-		
+    <script src="js/firebase-app.js"></script>
+    <script src="js/firebase-messaging.js"></script>
     <script src="js/firebase.js"></script>
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/materialize.min.js"></script>
     <script src="js/vue.min.js"></script>
     <script src="js/q.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/main.js"></script>
     <script>
-	  var debtCard = {
+    Notification.requestPermission(function (status) {
+        if (Notification.permission !== status) {
+          Notification.permission = status;
+        }
+      });
+    
+    var messaging = firebase.messaging();
+    messaging.onMessage(function(payload) {
+        console.log("Message received: ", payload);
+        if (payload.notification.title === 'New debt created') {
+        	// window.location = 'confirmDebt.html?id=' + payload.notification.body;
+        	$('#fcmMsgTitle').html(payload.notification.body + ' Please <a href="' + payload.notification.click_action + '">click here</a>.');
+            $('#fcmMsg').modal('open');
+            return;
+        }
+        if (payload.notification.title === 'Debt confirmed') {
+        	new Notification(payload.notification.body, {tag: 'debt-remind'});
+            return;
+        }
+        if (payload.notification.title === 'Debt rejected') {
+        	new Notification(payload.notification.body, {tag: 'debt-remind'});
+            return;
+        }
+    });
+    
+	var debtCard = {
 		props: {
 			'debtId': { type: String },
 			'debt': { type: Object, default: function() { return {}; } }, 
@@ -196,7 +228,7 @@
 			var self = this;
 			datastore.getProfile(this.contact).then(function(profile) {
 				if (!profile.photoURL || profile.photoURL.trim().length == 0) {
-					profile.photoURL = "http://supritmedicals.com/img/thumb.png";
+					profile.photoURL = "img/default-profile-pic.png";
 				}
 				self.contactData = profile;
 			});
@@ -206,99 +238,98 @@
 				return (this.debt.lender === this.user.uid)? this.debt.borrower : this.debt.lender;
 			}
 		}
-	  }
-		var app = new Vue({
-			el : '#app',
-			data : {
-				user: {},
-				profile: {},
-				debtForm: {},
-				debts: {},
-				contacts: {}
+	}
+	
+	var app = new Vue({
+		el : '#app',
+		data : {
+			profile: {},
+			debtForm: {},
+			debts: {},
+			contacts: {}
+		},
+		methods: {
+			login: function() {
+				var provider = new firebase.auth.GoogleAuthProvider();
+				firebase.auth().signInWithPopup(provider);
 			},
-			methods: {
-				login: function() {
-					var provider = new firebase.auth.GoogleAuthProvider();
-					firebase.auth().signInWithPopup(provider);
-				},
-				logout: function() {
-					firebase.auth().signOut();
-					$(".button-collapse").sideNav('hide');
-				},
-				addDebt: function() {
-					var borrower = $('#borrower').val();
-					var dueDate = $('#duedate').val();
-					var desc = this.debtForm.description || '';
-					
-					if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
-						return;
-					}
-					
-					var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
-					datastore.addDebt(debt);
-					
-					$('#borrower-btn').text('SELECT BORROWER');
-					$('#borrower').val('');
-					$('#duedate').val('');
-					this.debtForm = {};
-				},
-				selectBorrower: function(cid) {
-					var contact = this.contacts[cid];
-					console.log('select borrower', contact);
-					$('#borrower-btn').text(contact.displayName);
-					$('#borrower').val(cid);
-				},
-				approveDebt: function(debtId) {
-					$('#approveModal').modal('open');
-					$('#approveModal').data('debt-id', debtId);
-				},
-				confirmApprove: function() {
-					var debtId = $('#approveModal').data('debt-id');
-					console.log('confirm approving debt', debtId);
-					datastore.updateDebtStatus(debtId, 'paid');
-				}
+			logout: function() {
+				firebase.auth().signOut();
+				$(".button-collapse").sideNav('hide');
 			},
-			computed: {
-				isLoggedIn: function() {
-					return !!this.user.uid;
-				}
-			},
-			components: {
-				'debt-card': debtCard
-			}
-		});
-		
-		firebase.auth().onAuthStateChanged(function(user) {
-			if (!user) {
-				// no user sign in
-				app.user = {};
-				app.profile = {};
-			} else {
-				var userData = user.providerData[0];
-				console.log('user', userData);
-				app.user = userData;
+			addDebt: function() {
+				var self = this;
 				
-				datastore.addMember(userData)
-				.then(function(profile) {
-					if (!profile.bankAccount) {
-						window.location = 'profile.html';
-						return;
-					}
-					app.profile = profile;
-				})
-				.then(function() {
-					datastore.watchDashboard(userData.uid, function(data) {
-						console.log('dashboard update', data);
-						app.debts = data;
+				var borrower = $('#borrower').val();
+				var dueDate = $('#duedate').val();
+				var desc = this.debtForm.description || '';
+				
+				if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
+					return;
+				}
+				
+				var debt = { lender: this.profile.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
+				datastore.addDebt(debt)
+					.then(function(debtId) {
+						datastore.getProfile(borrower)
+							.then(function(borrowerProfile) {
+								helper.sendMessage(borrowerProfile.fcmToken, {
+									title: 'New debt created',
+									body: "There's a new debt pending for your review.",
+									click_action: window.location.origin + "/confirmDebt.html?id=" + debtId
+								});
+							})
 					});
-					datastore.watchProfile(function(members) {
-						var contacts = $.extend({}, members);
-						delete contacts[userData.uid];
-						app.contacts = contacts;
-					});
-				});
+				
+				$('#borrower-btn').text('SELECT BORROWER');
+				$('#borrower').val('');
+				$('#duedate').val('');
+				this.debtForm = {};
+			},
+			selectBorrower: function(cid) {
+				var contact = this.contacts[cid];
+				console.log('select borrower', contact);
+				$('#borrower-btn').text(contact.displayName);
+				$('#borrower').val(cid);
+			},
+			approveDebt: function(debtId) {
+				$('#approveModal').modal('open');
+				$('#approveModal').data('debt-id', debtId);
+			},
+			confirmApprove: function() {
+				var debtId = $('#approveModal').data('debt-id');
+				console.log('confirm approving debt', debtId);
+				datastore.updateDebtStatus(debtId, 'paid');
 			}
-		});
+		},
+		computed: {
+			isLoggedIn: function() {
+				return !!this.profile.uid;
+			}
+		},
+		components: {
+			'debt-card': debtCard
+		}
+	});
+	
+	datastore.watchLoginState(function(profile) {
+		if (!profile) {
+			app.profile = {};
+		} else {
+			app.profile = profile;
+			
+			datastore.watchDashboard(profile.uid, function(data) {
+				console.log('dashboard update', data);
+				app.debts = data;
+			});
+			datastore.watchProfile(function(members) {
+				var contacts = $.extend({}, members);
+				delete contacts[profile.uid];
+				app.contacts = contacts;
+			});	
+		}
+	});
+		
 	</script>
     </body>
 </html>

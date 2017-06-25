@@ -2,3 +2,5 @@
 .project
 *.swp
 *.log
+node_modules
+

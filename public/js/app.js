@@ -32,7 +32,42 @@ var datastore = (function(firebase) {
 	};
 	
 	firebase.initializeApp(config);
+    
 	var database = firebase.database();
+	var messaging = firebase.messaging();
+	
+	function watchLoginState(callback) {
+		if (!callback)
+			return;
+		
+		firebase.auth().onAuthStateChanged(function(user) {
+			if (!user) {
+				callback();
+			} else {
+				var userData = user.providerData[0];
+				console.log('user', userData);
+				
+				addMember(userData)
+				.then(function(profile) {
+					console.log('profile:', profile);
+					callback(profile);
+					
+					messaging.requestPermission()
+						.then(function() {
+							console.log('Notification permission granted Test ..');
+				            return messaging.getToken();
+						})
+						.then(function(token){
+				            console.log('fcm token:', token);
+				            return updateFcmToken(profile.uid, token);
+				        },function(err) {
+				        	console.log('found error', err);
+				        	callback(profile);
+				        });
+				});
+			}
+		});
+	}
 	
 	function watchDashboard(uid, callback) {
 		console.log('begin: load dashboard for user', uid);
@@ -49,8 +84,12 @@ var datastore = (function(firebase) {
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
-		database.ref('dashboard/' + debt.lender + '/' + key).set(debt);
-		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
+		return Q.all([
+				database.ref('dashboard/' + debt.lender + '/' + key).set(debt),
+				database.ref('dashboard/' + debt.borrower + '/' + key).set(debt)])
+			.then(function() {
+				return key;
+			});
 	}
 	
 	function getDebt(debtId) {
@@ -81,7 +120,11 @@ var datastore = (function(firebase) {
 
 			if (profile != null) {
 				console.log('profile already exists');
-				updatePicture(user.uid, user.photoURL).then(function() {
+				updatePicture(user.uid, user.photoURL)
+				.then(function() {
+					return updateLastLogin(user.uid);
+				})
+				.then(function() {
 					deferred.resolve(profile);
 				})
 				return;
@@ -89,10 +132,11 @@ var datastore = (function(firebase) {
 			
 			console.log('profile not exists');
 			var newProfile = {
-					displayName: user.displayName,
-			    	email: user.email,
-			    	photoURL: user.photoURL
-				};
+				displayName: user.displayName,
+		    	email: user.email,
+		    	photoURL: user.photoURL,
+		    	lastLogin: new Date().toUTCString()
+			};
 			
 			updateProfile(user.uid, newProfile).then(function() {
 				deferred.resolve(newProfile);
@@ -121,6 +165,7 @@ var datastore = (function(firebase) {
 	
 	// uid = string, profile = { displayName, email, bankAccount }
 	function updateProfile(uid, profile) {
+		profile.uid = uid;
 		return database.ref('member/' + uid).set(profile);
 	}
 	
@@ -128,7 +173,16 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid + '/photoURL').set(photoURL);
 	}
 	
+	function updateLastLogin(uid) {
+		return database.ref('member/' + uid + '/lastLogin').set(new Date().toUTCString());
+	}
+	
+	function updateFcmToken(uid, token) {
+		return database.ref('member/' + uid + '/fcmToken').set(token);
+	}
+	
 	return {
+		watchLoginState: watchLoginState,
 		watchDashboard: watchDashboard,
 		watchProfile: watchProfile,
 		addDebt: addDebt,
@@ -137,7 +191,9 @@ var datastore = (function(firebase) {
 		updateProfile: updateProfile,
 		getDebt: getDebt,
 		updateDebtStatus: updateDebtStatus,
-		deleteDebt: deleteDebt
+		deleteDebt: deleteDebt,
+		updateLastLogin: updateLastLogin,
+		updateFcmToken: updateFcmToken
 	}
 	
 })(firebase);
@@ -153,8 +209,21 @@ var helper = (function() {
 	       }
 	       return(false);
 	}
+	function sendMessage(token, data) {
+		var xmlhttp = new XMLHttpRequest(); 
+        xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.setRequestHeader("Authorization", "key=AIzaSyBPn3P3AiGxfg9MCNQiGczFC5QArpG56-w");
+        xmlhttp.send(JSON.stringify({
+        	notification: data,
+        	to: token
+        }));
+        
+	}
+	
 	return {
-		getQueryVariable:getQueryVariable
+		getQueryVariable:getQueryVariable,
+		sendMessage: sendMessage
 	};
 })();
 

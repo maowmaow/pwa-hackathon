@@ -21,7 +21,7 @@
       <a class="back" href="/"><i class="material-icons">navigate_before</i> </a>
       <div class="chat-top-user"><img v-bind:src="contact.photoURL" draggable="false"/>
       <div class="name">{{contact.displayName}}</div>
-      <div class="last">-</div></div>
+      <div class="last">Last login: {{contact.lastLogin}}</div></div>
     </div>
     <div id="messages-card-container" class="col s12" style="height: 100%;overflow: auto;">
 
@@ -77,40 +77,32 @@
 var app = new Vue({
 	el : '#app',
 	data : {
-		user: {},
 		profile: {},
 		contact: {}
 	},
 	methods: {
 	}
 });
-      
-firebase.auth().onAuthStateChanged(function(user) {
-	if (!user) {
-		// user is not logged in
+
+datastore.watchLoginState(function(profile) {
+	if (!profile) {
 		window.location = "/index.html";
 	} else {
-		var userData = user.providerData[0];
-		console.log('user', userData);
-		app.user = userData;
+		app.profile = profile;
 		
-		var uid = userData.uid;
-		datastore.getProfile(uid).then(function(profile) {
-			app.profile = profile;
-			
-			var debtId = helper.getQueryVariable("id");
-			datastore.getDebt(debtId)
-			.then(function(debt) {
-				return datastore.getProfile(debt.lender === uid? debt.borrower : debt.lender);
-			})
-			.then(function(profile) {
-				if (!profile.photoURL)
-					profile.photoURL = "http://supritmedicals.com/img/thumb.png";
-				app.contact = profile;
-			});
+		var debtId = helper.getQueryVariable("id");
+		datastore.getDebt(debtId)
+		.then(function(debt) {
+			return datastore.getProfile(debt.lender === profile.uid? debt.borrower : debt.lender);
+		})
+		.then(function(profile) {
+			if (!profile.photoURL)
+				profile.photoURL = "img/default-profile-pic.png";
+			app.contact = profile;
 		});
 	}
 });
+
  </script> 
 </body>
 </html>
