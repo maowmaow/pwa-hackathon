@@ -151,36 +151,13 @@
           </div>
         </div>
     </div>
-<<<<<<< HEAD
-<!--
-  <div id="fcmMsg" class="modal">
-      <div class="alert warning">
-          <span class="closebtn">&times;</span>  
-         <span id="title"></span>
-    </div>
-  </div>
--->
-        
-<div id="fcmMsg" class="modal bottom-sheet">
-    <div class="modal-content">
-      <span id="title"></span>
-    </div>
-    <div class="modal-footer">
-      <a href="profile.html" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-    </div>
-  </div>
-        
-        
-
-=======
 
 	<div id="fcmMsg" class="modal">
 		<div class="modal-content">
 			<h4><span id="fcmMsgTitle"></span></h4>
         </div>
 	</div>
-    
->>>>>>> b327382383970bbe18235fcabf5f96c215dc415d
+
 	<script type="x-template" id="debt-card-template">
 			<li class="collection-item avatar z-depth-1" 
 				v-bind:class="{ 'item-green': (debt.lender === user.uid), 'item-red': (debt.borrower === user.uid), 'item-pending': (debt.status == 'pending') }">
@@ -209,7 +186,7 @@
     <script src="js/q.js"></script>
     <script src="js/app.js"></script>
     <script>
-<<<<<<< HEAD
+
     function sendMsgToFCM(titleMsg,bodyMsg,tokenId){
         bodyMsg = new Date();
 		var xmlhttp = new XMLHttpRequest(); 
@@ -244,17 +221,6 @@
         $('#fcmMsg').modal('open');
         //Materialize.toast('I am a toast!', 4000)
         // [END_EXCLUDE]
-=======
-    var messaging = firebase.messaging();
-    messaging.onMessage(function(payload) {
-        console.log("Message received: ", payload);
-        if (payload.notification.title === 'New debt created') {
-        	
-        	// window.location = 'confirmDebt.html?id=' + payload.notification.body;
-        	$('#fcmMsgTitle').html(payload.notification.body + ' Please <a href="' + payload.notification.click_action + '">click here</a>.');
-            $('#fcmMsg').modal('open');
-        }
->>>>>>> b327382383970bbe18235fcabf5f96c215dc415d
     });
     
 	var debtCard = {
