@@ -151,6 +151,7 @@
           </div>
         </div>
     </div>
+<<<<<<< HEAD
 <!--
   <div id="fcmMsg" class="modal">
       <div class="alert warning">
@@ -171,6 +172,15 @@
         
         
 
+=======
+
+	<div id="fcmMsg" class="modal">
+		<div class="modal-content">
+			<h4><span id="fcmMsgTitle"></span></h4>
+        </div>
+	</div>
+    
+>>>>>>> b327382383970bbe18235fcabf5f96c215dc415d
 	<script type="x-template" id="debt-card-template">
 			<li class="collection-item avatar z-depth-1" 
 				v-bind:class="{ 'item-green': (debt.lender === user.uid), 'item-red': (debt.borrower === user.uid), 'item-pending': (debt.status == 'pending') }">
@@ -199,6 +209,7 @@
     <script src="js/q.js"></script>
     <script src="js/app.js"></script>
     <script>
+<<<<<<< HEAD
     function sendMsgToFCM(titleMsg,bodyMsg,tokenId){
         bodyMsg = new Date();
 		var xmlhttp = new XMLHttpRequest(); 
@@ -233,9 +244,20 @@
         $('#fcmMsg').modal('open');
         //Materialize.toast('I am a toast!', 4000)
         // [END_EXCLUDE]
+=======
+    var messaging = firebase.messaging();
+    messaging.onMessage(function(payload) {
+        console.log("Message received: ", payload);
+        if (payload.notification.title === 'New debt created') {
+        	
+        	// window.location = 'confirmDebt.html?id=' + payload.notification.body;
+        	$('#fcmMsgTitle').html(payload.notification.body + ' Please <a href="' + payload.notification.click_action + '">click here</a>.');
+            $('#fcmMsg').modal('open');
+        }
+>>>>>>> b327382383970bbe18235fcabf5f96c215dc415d
     });
     
-	  var debtCard = {
+	var debtCard = {
 		props: {
 			'debtId': { type: String },
 			'debt': { type: Object, default: function() { return {}; } }, 
@@ -262,100 +284,125 @@
 				return (this.debt.lender === this.user.uid)? this.debt.borrower : this.debt.lender;
 			}
 		}
-	  }
-		var app = new Vue({
-			el : '#app',
-			data : {
-				user: {},
-				profile: {},
-				debtForm: {},
-				debts: {},
-				contacts: {}
+	}
+	
+	var app = new Vue({
+		el : '#app',
+		data : {
+			user: {},
+			profile: {},
+			debtForm: {},
+			debts: {},
+			contacts: {}
+		},
+		methods: {
+			login: function() {
+				var provider = new firebase.auth.GoogleAuthProvider();
+				firebase.auth().signInWithPopup(provider);
 			},
-			methods: {
-				login: function() {
-					var provider = new firebase.auth.GoogleAuthProvider();
-					firebase.auth().signInWithPopup(provider);
-				},
-				logout: function() {
-					firebase.auth().signOut();
-					$(".button-collapse").sideNav('hide');
-				},
-				addDebt: function() {
-					var borrower = $('#borrower').val();
-					var dueDate = $('#duedate').val();
-					var desc = this.debtForm.description || '';
-					
-					if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
-						return;
-					}
-					
-					var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
-					datastore.addDebt(debt);
-					
-					$('#borrower-btn').text('SELECT BORROWER');
-					$('#borrower').val('');
-					$('#duedate').val('');
-					this.debtForm = {};
-				},
-				selectBorrower: function(cid) {
-					var contact = this.contacts[cid];
-					console.log('select borrower', contact);
-					$('#borrower-btn').text(contact.displayName);
-					$('#borrower').val(cid);
-				},
-				approveDebt: function(debtId) {
-					$('#approveModal').modal('open');
-					$('#approveModal').data('debt-id', debtId);
-				},
-				confirmApprove: function() {
-					var debtId = $('#approveModal').data('debt-id');
-					console.log('confirm approving debt', debtId);
-					datastore.updateDebtStatus(debtId, 'paid');
-				}
+			logout: function() {
+				firebase.auth().signOut();
+				$(".button-collapse").sideNav('hide');
 			},
-			computed: {
-				isLoggedIn: function() {
-					return !!this.user.uid;
-				}
-			},
-			components: {
-				'debt-card': debtCard
-			}
-		});
-		
-		firebase.auth().onAuthStateChanged(function(user) {
-			if (!user) {
-				// no user sign in
-				app.user = {};
-				app.profile = {};
-			} else {
-				var userData = user.providerData[0];
-				console.log('user', userData);
-				app.user = userData;
+			addDebt: function() {
+				var self = this;
 				
-				datastore.addMember(userData)
-				.then(function(profile) {
-					if (!profile.bankAccount) {
-						window.location = 'profile.html';
-						return;
-					}
-					app.profile = profile;
-				})
-				.then(function() {
-					datastore.watchDashboard(userData.uid, function(data) {
-						console.log('dashboard update', data);
-						app.debts = data;
+				var borrower = $('#borrower').val();
+				var dueDate = $('#duedate').val();
+				var desc = this.debtForm.description || '';
+				
+				if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
+					return;
+				}
+				
+				var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
+				datastore.addDebt(debt)
+					.then(function(debtId) {
+						datastore.getProfile(borrower)
+							.then(function(borrowerProfile) {
+								helper.sendMessage(borrowerProfile.fcmToken, {
+									title: 'New debt created',
+									body: "There's a new debt pending for your review.",
+									click_action: "confirmDebt.html?id=" + debtId
+								});
+							})
 					});
-					datastore.watchProfile(function(members) {
-						var contacts = $.extend({}, members);
-						delete contacts[userData.uid];
-						app.contacts = contacts;
-					});
-					datastore.updateLastLogin(userData.uid);
-				});
+				
+				$('#borrower-btn').text('SELECT BORROWER');
+				$('#borrower').val('');
+				$('#duedate').val('');
+				this.debtForm = {};
+			},
+			selectBorrower: function(cid) {
+				var contact = this.contacts[cid];
+				console.log('select borrower', contact);
+				$('#borrower-btn').text(contact.displayName);
+				$('#borrower').val(cid);
+			},
+			approveDebt: function(debtId) {
+				$('#approveModal').modal('open');
+				$('#approveModal').data('debt-id', debtId);
+			},
+			confirmApprove: function() {
+				var debtId = $('#approveModal').data('debt-id');
+				console.log('confirm approving debt', debtId);
+				datastore.updateDebtStatus(debtId, 'paid');
 			}
-		});
+		},
+		computed: {
+			isLoggedIn: function() {
+				return !!this.user.uid;
+			}
+		},
+		components: {
+			'debt-card': debtCard
+		}
+	});
+		
+	firebase.auth().onAuthStateChanged(function(user) {
+		if (!user) {
+			// no user sign in
+			app.user = {};
+			app.profile = {};
+		} else {
+			var userData = user.providerData[0];
+			console.log('user', userData);
+			app.user = userData;
+			
+			datastore.addMember(userData)
+			.then(function(profile) {
+				if (!profile.bankAccount) {
+					window.location = 'profile.html';
+					return;
+				}
+				app.profile = profile;
+			})
+			.then(function() {
+				datastore.watchDashboard(userData.uid, function(data) {
+					console.log('dashboard update', data);
+					app.debts = data;
+				});
+				datastore.watchProfile(function(members) {
+					var contacts = $.extend({}, members);
+					delete contacts[userData.uid];
+					app.contacts = contacts;
+				});
+				datastore.updateLastLogin(userData.uid);
+				return messaging.requestPermission();
+			})
+			.then(function() {
+				console.log('Notification permission granted Test ..');
+	            return messaging.getToken();
+	        })
+	        .then(function(token){
+	            console.log('fcm token:', token);
+	            return datastore.updateFcmToken(userData.uid, token);
+	        })
+	        .catch(function(err) {
+				console.log('Unable to get permission to notify.', err);
+	        });
+		}
+	});
 	</script>
     </body>
 </html>
