@@ -128,6 +128,10 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid + '/photoURL').set(photoURL);
 	}
 	
+	function updateLastLogin(uid) {
+		return database.ref('member/' + uid + '/lastLogin').set(new Date().toUTCString());
+	}
+	
 	return {
 		watchDashboard: watchDashboard,
 		watchProfile: watchProfile,
@@ -137,7 +141,8 @@ var datastore = (function(firebase) {
 		updateProfile: updateProfile,
 		getDebt: getDebt,
 		updateDebtStatus: updateDebtStatus,
-		deleteDebt: deleteDebt
+		deleteDebt: deleteDebt,
+		updateLastLogin: updateLastLogin
 	}
 	
 })(firebase);

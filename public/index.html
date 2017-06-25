@@ -103,8 +103,10 @@
           </div>
         </div>
       </footer>
-        <!-- Modal Structure -->
-        <div id="modal1" class="modal">
+      
+      
+      <!-- Modal Structure -->
+      <div id="modal1" class="modal">
           <div class="modal-content">
             <div class="row">
               <form class="col s12">
@@ -295,6 +297,7 @@
 						delete contacts[userData.uid];
 						app.contacts = contacts;
 					});
+					datastore.updateLastLogin(userData.uid);
 				});
 			}
 		});

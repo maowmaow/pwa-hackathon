@@ -21,7 +21,7 @@
       <a class="back" href="/"><i class="material-icons">navigate_before</i> </a>
       <div class="chat-top-user"><img v-bind:src="contact.photoURL" draggable="false"/>
       <div class="name">{{contact.displayName}}</div>
-      <div class="last">-</div></div>
+      <div class="last">{{contact.lastLogin}}</div></div>
     </div>
     <div id="messages-card-container" class="col s12" style="height: 100%;overflow: auto;">
 
