@@ -52,7 +52,9 @@ html {
     top: inherit;
     bottom: 10px;
 }
-
+.tabs.tabs-transparent .tab a {
+    color: #ffffff;
+}
 /*      Profile Page     */
 .my-profile .card-title{
    color:#338D83;
