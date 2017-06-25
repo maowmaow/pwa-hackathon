@@ -20,8 +20,12 @@
     <div class="chat-menu teal lighten-3" id="app">
       <a class="back" href="/"><i class="material-icons">navigate_before</i> </a>
       <div class="chat-top-user"><img v-bind:src="contact.photoURL" draggable="false"/>
-      <div class="name">{{contact.displayName}}</div>
-      <div class="last">Last login: {{contact.lastLogin}}</div></div>
+        <div class="name">{{contact.displayName}}</div>
+        <div class="last">
+            Location: {{contact.location.political}} {{contact.location.locality}} <br>
+            Last login: {{contact.lastLogin}} 
+        </div>
+      </div>
     </div>
     <div id="messages-card-container" class="col s12" style="height: 100%;overflow: auto;">
 

@@ -267,13 +267,13 @@ function showPosition(position,callback) {
 	      if (results) {
           	for (var i=0; i<results.address_components.length; i++) {
                 if (results.address_components[i].types[0] == "country") {
-                    country = results.address_components[i].long_name;
+                    country = results.address_components[i].short_name;
                 }
                 if (results.address_components[i].types[0] == "locality") {
-                    locality = results.address_components[i].long_name;
+                    locality = results.address_components[i].short_name;
                 }
                 if (results.address_components[i].types[0] == "political") {
-                    political = results.address_components[i].long_name;
+                    political = results.address_components[i].short_name;
                 }
     		}
     		address = results.formatted_address;
