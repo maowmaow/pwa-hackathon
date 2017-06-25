@@ -107,20 +107,22 @@
         },
         methods: {
           approve: function() {
+            var self = this;
             datastore.updateDebtStatus(this.debtDetail.id, 'active').then(function() {
-				helper.sendMessage(lenderProfile.fcmToken, {
+				helper.sendMessage(self.lenderProfile.fcmToken, {
 					title: 'Debt confirmed',
-					body: profile.displayName + " has confirmed his debt."
+					body: self.profile.displayName + " has confirmed his debt."
 				});
             }).then(function() {
             	window.location = "index.html";
             });
           },
           reject: function() {
-            datastore.updateDebtStatus(this.debtDetail.id, 'reject').then(function() {
-            	helper.sendMessage(lenderProfile.fcmToken, {
+            var self = this;
+            datastore.deleteDebt(this.debtDetail.id).then(function() {
+            	helper.sendMessage(self.lenderProfile.fcmToken, {
 					title: 'Debt rejected',
-					body: profile.displayName + " has rejected his debt."
+					body: self.profile.displayName + " has rejected his debt."
 				});
             }).then(function() {
 				window.location = "index.html";
