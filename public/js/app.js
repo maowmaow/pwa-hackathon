@@ -109,11 +109,13 @@ var datastore = (function(firebase) {
 	}
 	
 	function deleteDebt(debtId) {
-		return Q.all([
-			database.ref('debts/' + debtId).remove(),
-			database.ref('dashboard/' + debt.lender + '/' + key).remove(),
-			database.ref('dashboard/' + debt.borrower + '/' + key).remove()
-		]);
+		return getDebt(debtId).then(function(debt) {
+			return Q.all([
+				database.ref('debts/' + debtId).remove(),
+				database.ref('dashboard/' + debt.lender + '/' + debtId).remove(),
+				database.ref('dashboard/' + debt.borrower + '/' + debtId).remove()
+			])
+		});
 	}
 	
 	function addMember(user) {
@@ -226,6 +228,8 @@ var helper = (function() {
 	       return(false);
 	}
 	function sendMessage(token, data) {
+		var deferred = Q.defer();
+		
 		var xmlhttp = new XMLHttpRequest(); 
         xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
         xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -234,7 +238,11 @@ var helper = (function() {
         	notification: data,
         	to: token
         }));
+        xmlhttp.onload = function() {
+        	deferred.resolve();
+        }
         
+        return deferred.promise;
 	}
 	
 	return {
