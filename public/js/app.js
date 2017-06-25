@@ -263,7 +263,7 @@ function getLocation(callback) {
 }
 function showPosition(position,callback) {
 	console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
-	url = "http://maps.googleapis.com/maps/api/geocode/json";
+	url = "//maps.googleapis.com/maps/api/geocode/json";
 	data = {latlng : position.coords.latitude + ","+ position.coords.longitude ,sensor:false},
 	$.ajax({
 	  type: "GET",
