@@ -109,7 +109,7 @@
           approve: function() {
             var self = this;
             datastore.updateDebtStatus(this.debtDetail.id, 'active').then(function() {
-				helper.sendMessage(self.lenderProfile.fcmToken, {
+				return helper.sendMessage(self.lenderProfile.fcmToken, {
 					title: 'Debt confirmed',
 					body: self.profile.displayName + " has confirmed his debt."
 				});
@@ -120,7 +120,7 @@
           reject: function() {
             var self = this;
             datastore.deleteDebt(this.debtDetail.id).then(function() {
-            	helper.sendMessage(self.lenderProfile.fcmToken, {
+            	return helper.sendMessage(self.lenderProfile.fcmToken, {
 					title: 'Debt rejected',
 					body: self.profile.displayName + " has rejected his debt."
 				});
@@ -158,6 +158,7 @@
      			return datastore.getProfile(card.lender);
             })
             .then(function(lenderProfile){
+            	console.log('lender profile', lenderProfile);
 				app.lenderProfile = lenderProfile;
             });
   		}
