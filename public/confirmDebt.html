@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Debt Remind</title>
+      <link rel="manifest" href="manifest.json">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>      
+      <meta name="mobile-web-app-capable" content="yes">
+      <meta name="application-name" content="Debt Remind">
+      <meta name="theme-color" content="#009688">
+      <link rel="icon" sizes="192x192" href="img/ic_launcher2.png">
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+      <link href="css/app.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div id="app">
+      <nav class="nav-extended teal lighten-3">
+         <div class="nav-wrapper">
+            <a href="index.html" class="brand-logo">
+                <img class="valign-wrapper" src="img/ic_launcher2.png" style="width: 60px;height: 60px;">
+            </a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse">
+              <i class="material-icons">menu</i>
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+             <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
+              <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <span class="user-name">{{profile.displayName}}</span>
+                  </a>
+              </li>
+              <li v-if="isLoggedIn" class="sign-out"><a href="javascript:void(0)" v-on:click="logout">Sign-out</a></li>
+            </ul>
+          </div>
+           <div class="nav-content">
+              <ul class="tabs tabs-transparent">
+                <li class="tab"><a class="active" href="#test1">Debt Description</a></li>
+                <li class="indicator" style="right: 189px; left: 69px;"></li>
+              </ul>
+           </div>
+      </nav>
+
+      <div class="container">
+        <div  id="test1" class="row">
+          <div class="col s12">
+            <div class="card my-profile">
+                <img v-bind:src="lenderProfile.photoURL" class="responsive-img">
+                <div class="card-content">
+                    <div class="row">
+                      <form class="col s12">
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <input id="display_name" type="text" class="validate" v-model="lenderProfile.displayName">
+                            <label for="display_name" v-bind:class="{ active: lenderProfile.displayName }">From</label>
+                          </div>
+                        </div>
+                      <div class="row">
+                          <div class="input-field col s12">
+                            <input id="amount" type="number" class="validate" v-model="debtDetail.amount">
+                            <label for="amount" v-bind:class="{ active: debtDetail.amount }">Amount</label>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <input id="description" type="text" class="validate" v-model="debtDetail.description">
+                            <label for="description" v-bind:class="{ active: debtDetail.description }">Description</label>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <input id="deudate" type="text" class="validate" v-model="debtDetail.dueDate">
+                            <label for="deudate" v-bind:class="{ active: debtDetail.dueDate }">Due Date</label>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <a class="waves-effect waves-light btn-large" v-on:click="approve">Approve</a>
+                    <a class="waves-effect waves-light btn-large" v-on:click="reject">Reject</a>
+                </div>
+                
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/materialize.min.js"></script>
+    <script src="js/vue.min.js"></script>
+    <script src="js/q.js"></script>
+    <script src="js/app.js"></script>
+
+    <script> 
+      var app = new Vue({
+          el : '#app',
+          data : {
+          user: {},
+          profile: {},
+          debtDetail :{},
+          lenderProfile:{}
+        },
+        methods: {
+          approve: function() {
+            console.log('profile', this.profile.bankAccount);
+            if (!this.profile.bankAccount) {
+              console.log('field is required');
+              return;
+            }
+            datastore.updateDebtStatus(this.debtDetail.id, 'active').then(function() {
+            window.location = "index.html";
+            });
+          },
+          reject: function() {
+            console.log('profile', this.profile.bankAccount);
+            if (!this.profile.bankAccount) {
+              console.log('field is required');
+              return;
+            }
+            datastore.updateDebtStatus(this.debtDetail.id, 'reject').then(function() {
+            window.location = "index.html";
+            });
+          },
+			logout: function() {
+				firebase.auth().signOut();
+				$(".button-collapse").sideNav('hide');
+			}
+        },
+		computed: {
+			isLoggedIn: function() {
+				return !!this.user.uid;
+			}
+		}
+      });
+
+      firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        // user is not logged in
+        window.location = "/index.html";
+      } else {
+        var userData = user.providerData[0];
+        console.log('user', userData);
+        app.user = userData;
+
+        var uid = userData.uid;
+        datastore.getProfile(uid).then(function(data) {
+          console.log(data);
+          app.profile = data;
+          var debtCardId = getQueryVariable("id");
+          datastore.getDebt(debtCardId)
+          .then(function(card){
+            if (!card)
+            	return new Error('debt not found id: ' + debtCardId);
+            
+            card.id = debtCardId;
+            app.debtDetail = card;
+            return datastore.getProfile(card.lender);
+          })
+          .then(function(lenderProfile){
+            app.lenderProfile = lenderProfile;
+          })
+        });
+      }
+      });
+
+
+      function getQueryVariable(variable){
+         var query = window.location.search.substring(1);
+         var vars = query.split("&");
+         for (var i=0;i<vars.length;i++) {
+                 var pair = vars[i].split("=");
+                 if(pair[0] == variable){return pair[1];}
+         }
+         return(false);
+      }
+    </script> 
+  </body>
+</html>
