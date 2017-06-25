@@ -109,7 +109,11 @@ var datastore = (function(firebase) {
 	}
 	
 	function deleteDebt(debtId) {
-		return database.ref('debts/' + debtId).remove();
+		return Q.all([
+			database.ref('debts/' + debtId).remove(),
+			database.ref('dashboard/' + debt.lender + '/' + key).remove(),
+			database.ref('dashboard/' + debt.borrower + '/' + key).remove()
+		]);
 	}
 	
 	function addMember(user) {

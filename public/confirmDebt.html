@@ -147,11 +147,12 @@
   			app.profile = profile;
   			
   			var debtId = helper.getQueryVariable("id");
+  			console.log('loading debt', debtId);
             datastore.getDebt(debtId)
             .then(function(card){
+                console.log('found debt', card);
 				if (!card)
               		return new Error('debt not found id: ' + debtId);
-              
           		card.id = debtId;
           		app.debtDetail = card;
      			return datastore.getProfile(card.lender);
