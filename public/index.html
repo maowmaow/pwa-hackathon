@@ -208,6 +208,10 @@
         	new Notification(payload.notification.body, {tag: 'debt-remind'});
             return;
         }
+        if (payload.notification.title === 'Debt paid') {
+        	new Notification(payload.notification.body, {tag: 'debt-remind'});
+            return;
+        }
         new Notification(payload.notification.title, {tag:'debt-message', body: payload.notification.body});
     });
     
@@ -302,7 +306,18 @@
 			confirmApprove: function() {
 				var debtId = $('#approveModal').data('debt-id');
 				console.log('confirm approving debt', debtId);
-				datastore.updateDebtStatus(debtId, 'paid');
+				datastore.updateDebtStatus(debtId, 'paid')
+				.then(function() {
+					return datastore.getDebt(debtId);
+				})
+				.then(function(debt) {
+					return datastore.getProfile(debt.borrower);
+				})
+				.then(function(borrowerProfile) {
+					helper.sendMessage(borrowerProfile.fcmToken, { title: 'Debt paid', body: 'Your debt has been fullfilled.' });
+				});
+				
+				
 			},
       acceptDebt: function(debtId){
         window.location = 'confirmDebt.html?id='+debtId;
