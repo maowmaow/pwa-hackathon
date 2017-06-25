@@ -19,6 +19,8 @@ var urlsToCache = [
   '/fonts/roboto/Roboto-Thin.woff2',
   '/fonts/Material_Icons.woff2',
   '/js/firebase.js',
+  '/js/firebase-app.js',
+  '/js/firebase-messaging.js',
   '/js/jquery-3.2.1.min.js',
   '/js/materialize.min.js',
   '/js/app.js',
