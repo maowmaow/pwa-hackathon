@@ -63,7 +63,8 @@
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
             	v-bind:user="profile"
-            	v-on:approve="approveDebt"></li>
+            	v-on:approve="approveDebt"
+              v-on:accept="acceptDebt"></li>
           </ul>
           <!-- end tab 1 content -->
         </div>
@@ -75,7 +76,8 @@
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="profile"></li>
+            	v-bind:user="profile"
+              v-on:accept="acceptDebt"></li>
           </ul>
         </div>
         <div id="tap3" class="col s12">
@@ -86,7 +88,8 @@
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="profile"></li>
+            	v-bind:user="profile"
+              v-on:accept="acceptDebt"></li>
           </ul>
         </div>
         <!-- Add Button -->
@@ -170,11 +173,12 @@
                 <i class="material-icons">more_vert</i>
                 <ul>
                   <li v-if="debt.status === 'active' && debt.lender === user.uid"><a class="btn-floating green darken-3" v-on:click="$emit('approve', debtId)"><i class="material-icons">done_all</i></a></li>
+                  <li v-if="debt.status === 'pending' && debt.borrower === user.uid"><a class="btn-floating green darken-3" v-on:click="$emit('accept', debtId)"><i class="material-icons">done_all</i></a></li>
                   <li v-if="contactData.telephone"><a class="btn-floating light-blue darken-3" v-bind:href="'tel:' + contactData.telephone"><i class="material-icons">phone</i></a></li>
                   <li><a class="btn-floating red darken-3" v-bind:href="'chatroom.html?id=' + debtId"><i class="material-icons">chat_bubble</i></a></li>
                 </ul>
               </div>
-              <span class="secondary-content green-text bottom">฿ {{debt.amount}}</span>
+              <span class="secondary-content bottom" v-bind:class="{ 'green-text': (debt.lender === user.uid), 'red-text': (debt.borrower === user.uid) }">฿ {{debt.amount}}</span>
             </li>
 	</script>
     <script src="js/firebase-app.js"></script>
@@ -303,7 +307,10 @@
 				var debtId = $('#approveModal').data('debt-id');
 				console.log('confirm approving debt', debtId);
 				datastore.updateDebtStatus(debtId, 'paid');
-			}
+			},
+      acceptDebt: function(debtId){
+        window.location = 'confirmDebt.html?id='+debtId;
+      }
 		},
 		computed: {
 			isLoggedIn: function() {
