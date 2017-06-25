@@ -158,6 +158,66 @@ var helper = (function() {
 	};
 })();
 
+function getLocation() {
+	if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(showPosition,showError);
+    } else {
+        console.log("Geolocation is not supported by this browser.");
+    }
+}
+function showPosition(position) {
+	console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
+	url = "http://maps.googleapis.com/maps/api/geocode/json";
+	data = {latlng : position.coords.latitude + ","+ position.coords.longitude ,sensor:false},
+	$.ajax({
+	  type: "GET",
+	  url: url,
+	  data : data,
+	  cache: false,
+	  success: function(results){
+ 		var results = results.results[0];
+	      if (results) {
+          	for (var i=0; i<results.address_components.length; i++) {
+                if (results.address_components[i].types[0] == "country") {
+                    country = results.address_components[i].long_name;
+                }
+                if (results.address_components[i].types[0] == "locality") {
+                    locality = results.address_components[i].long_name;
+                }
+                if (results.address_components[i].types[0] == "political") {
+                    political = results.address_components[i].long_name;
+                }
+    		}
+    		address = results.formatted_address;
+		    var location = {
+		    	address : address,
+		    	country : country,
+		    	locality : locality,
+		    	political : political
+		    }
+		    console.log("userLocation : "+ JSON.stringify(location));
+        } else {
+      	  console.log("No Location found");
+        }
+	  }
+	});
+}
+function showError(error) {
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            console.log("User denied the request for Geolocation.");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            console.log("Location information is unavailable.");
+            break;
+        case error.TIMEOUT:
+            console.log("The request to get user location timed out.");
+            break;
+        case error.UNKNOWN_ERROR:
+            console.log("An unknown error occurred.");
+            break;
+    }
+}
 $(document).ready(function(){
   // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
 	$('.modal').modal();
@@ -169,4 +229,5 @@ $(document).ready(function(){
 		selectMonths: true, // Creates a dropdown to control month
 		selectYears: 15 // Creates a dropdown of 15 years to control year
 	});
+	getLocation();
 });
