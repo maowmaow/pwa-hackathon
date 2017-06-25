@@ -231,7 +231,7 @@ var helper = (function() {
 		var deferred = Q.defer();
 		
 		var xmlhttp = new XMLHttpRequest(); 
-        xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
+        xmlhttp.open('POST', '//fcm.googleapis.com/fcm/send', true);
         xmlhttp.setRequestHeader("Content-Type", "application/json");
         xmlhttp.setRequestHeader("Authorization", "key=AIzaSyBPn3P3AiGxfg9MCNQiGczFC5QArpG56-w");
         xmlhttp.send(JSON.stringify({
