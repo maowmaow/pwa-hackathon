@@ -68,16 +68,9 @@ DebtRemind.prototype.loadMessages = function() {
   // Loads the last 12 messages and listen for new ones.
   var setMessage = function(data) {
     var val = data.val();
-    // console.log('K' + this.messagesRef);
-    // if(this.messagesRef.key == "messages") {
-    //   console.log('Load messages');
-    // 	this.displayMessage(data.key, val.name, val.text, val.photoUrl, val.imageUrl, val.time);;
-    // }
-    // else if(this.messagesRef.key == ("messagesChat/"+param1var)){
-    	this.displayMessage(data.key, val.name, val.text, val.photoUrl, val.imageUrl, val.time);
-    // }
+    this.displayMessage(data.key, val.name, val.text, val.photoUrl, val.imageUrl, val.time);
   }.bind(this);
-  // Edited by IQ - No Limit
+
   this.messagesRef.on('child_added', setMessage);
   this.messagesRef.on('child_changed', setMessage);
 };
@@ -103,13 +96,13 @@ DebtRemind.prototype.saveMessage = function(e) {
   if (this.messageInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser;
     // Add a new message entry to the Firebase Database.
-    var inputText = this.messageInput.value; //Added by IQ - use InputText
+    var inputText = this.messageInput.value;
     this.messagesRef.push({
       name: currentUser.displayName,
-      text: inputText, //Edited by IQ - use InputText instead
+      text: inputText,
       photoUrl: currentUser.photoURL || '/images/profile_placeholder.png',
       time: getCurrentTime()
-    }).then(function( newMsg ) { // Edit by IQ - Add newMsg parameter
+    }).then(function( newMsg ) {
     // Clear message text field and SEND button state.
     DebtRemind.resetMaterialTextfield(this.messageInput);
     this.toggleButton();
@@ -120,8 +113,10 @@ DebtRemind.prototype.saveMessage = function(e) {
 };
 
 function getCurrentTime(){
-  var d = new Date();
-  return d.toString()
+  var d = new Date(),
+      h = d.getHours(),
+      m = d.getMinutes();
+  return (h+":"+m)
 }
 
 // Sets the URL of the given img element with the URL of the image stored in Cloud Storage.
@@ -241,28 +236,16 @@ DebtRemind.prototype.requestNotificationsPermissions = function() {
 // Resets the given MaterialTextField.
 DebtRemind.resetMaterialTextfield = function(element) {
   element.value = '';
-  element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
+  // element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
 };
 
-// // Template for messages.
-// if(filename == '/'){
-//   DebtRemind.MESSAGE_TEMPLATE =
-//     '<a class="message-container">' +
-//       '<div class="spacing"><div class="pic"></div></div>' +
-//       '<div class="message"></div>' +
-//       '<div class="name"></div>' +
-//       '<div class="timeago" style="float: right;"></div>' +
-//       // '<div class="timeago" datetime="2008-07-17T09:24:17Z">July 17, 2008</div>' +
-//     '</a>';
-// }
 if(filename == '/chatroom.html'){
   DebtRemind.MESSAGE_TEMPLATE =
     '<div class="message-container chat">' +
       '<div class="people"><div class="pic"></div>' +
       '<div class="name"></div></div>' +
       '<div class="message"></div>' +
-      '<time>18.29</time>' +
-      // '<div class="timeago" style="float: right;"></div>' +
+      '<time class="time"></time>' +
     '</div>';
 }
 
@@ -271,7 +254,6 @@ if(filename == '/chatroom.html'){
 DebtRemind.LOADING_IMAGE_URL = 'https://www.google.com/images/spin-32.gif';
 
 // Displays a Message in the UI.
-// Edited by IQ - Add newMessage Parameter
 DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri, time, newMessage=0) {
   var div = document.getElementById(key);
   // If an element for that message does not exists yet we create it.
@@ -306,7 +288,6 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
     // Replace all line breaks by <br>.
     messageElement.innerHTML = messageElement.innerHTML.replace(/\n/g, '<br>');
 
-    //Added by IQ - Auto Link
     var urlRegex = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi; 
 	  var link = '<a href="$1" target="_blank">$1</a>'; 
 	  messageElement.innerHTML = messageElement.innerHTML.replace(urlRegex, link);
@@ -318,23 +299,18 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
     }.bind(this));
     this.setImageUrl(imageUri, act_image);
     messageElement.innerHTML = '';
-    messageElement.appendChild(modal)
+    messageElement.appendChild(act_image)
   }
 
-  // Set time
-  // var d = new Date(time).toISOString()
-  // $("#" + key + " > .timeago").attr('datetime', d).timeago()
+  div.querySelector('.time').textContent = time;
 
   // Show the card fading-in.
   setTimeout(function() {div.classList.add('visible')}, 1);
 
-  // Added by IQ - Scroll to bottom when in comment page
   if(this.messagesRef.key == "messagesChat") {
-  	//this.messageList.scrollTop = this.messageList.scrollHeight; 
     window.scrollTo(0,document.body.scrollHeight);
   }
   else{
-  	//this.messageList.scrollTop = this.messageList.scrollHeight - this.messageList.scrollTop - this.messageList.scrollHeight;
     window.scrollTo(0,document.body.scrollHeight);
   }
   this.messageInput.focus();
