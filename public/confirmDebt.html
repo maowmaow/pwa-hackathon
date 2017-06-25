@@ -107,11 +107,6 @@
         },
         methods: {
           approve: function() {
-            console.log('profile', this.profile.bankAccount);
-            if (!this.profile.bankAccount) {
-				console.log('field is required');
-				return;
-            }
             datastore.updateDebtStatus(this.debtDetail.id, 'active').then(function() {
 				helper.sendMessage(lenderProfile.fcmToken, {
 					title: 'Debt confirmed',
@@ -122,11 +117,6 @@
             });
           },
           reject: function() {
-            console.log('profile', this.profile.bankAccount);
-            if (!this.profile.bankAccount) {
-				console.log('field is required');
-				return;
-            }
             datastore.updateDebtStatus(this.debtDetail.id, 'reject').then(function() {
             	helper.sendMessage(lenderProfile.fcmToken, {
 					title: 'Debt rejected',
