@@ -312,41 +312,13 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
 	  messageElement.innerHTML = messageElement.innerHTML.replace(urlRegex, link);
 
   } else if (imageUri) { // If the message is an image.
-    var modal_image = document.createElement('img');
     var act_image = document.createElement('img');
-    var modal = document.createElement('div')
-    var bg = document.createElement('div')
-    var con = document.createElement('div')
-    var button = document.createElement('button')
-    modal.setAttribute('class', 'modal');
-    modal_image.setAttribute('style','max-width: 100%;max-height: 100%;');
-    bg.setAttribute('class', 'modal-background');
-    con.setAttribute('class', 'modal-content');
-    button.setAttribute('class', 'modal-close');
-
-    act_image.addEventListener("click", function(){
-      $("#" + key + " > .message > .modal").addClass('is-active')
-    });
-    button.addEventListener("click", function(){
-      $("#" + key + " > .message > .modal").removeClass('is-active')
-    });
-
-    act_image.addEventListener('load', function() {
-      this.messageList.scrollTop = this.messageList.scrollHeight;
-    }.bind(this));
     modal_image.addEventListener('load', function() {
       this.messageList.scrollTop = this.messageList.scrollHeight;
     }.bind(this));
     this.setImageUrl(imageUri, act_image);
-    this.setImageUrl(imageUri, modal_image);
     messageElement.innerHTML = '';
-
-    con.appendChild(modal_image)
-    modal.appendChild(bg)
-    modal.appendChild(con)
-    modal.appendChild(button)
     messageElement.appendChild(modal)
-    messageElement.appendChild(act_image)
   }
 
   // Set time
