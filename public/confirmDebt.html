@@ -24,7 +24,7 @@
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -32,7 +32,7 @@
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -100,9 +100,8 @@
 
     <script> 
       var app = new Vue({
-          el : '#app',
-          data : {
-          user: {},
+        el : '#app',
+        data : {
           profile: {},
           debtDetail :{},
           lenderProfile:{}
@@ -111,21 +110,31 @@
           approve: function() {
             console.log('profile', this.profile.bankAccount);
             if (!this.profile.bankAccount) {
-              console.log('field is required');
-              return;
+				console.log('field is required');
+				return;
             }
             datastore.updateDebtStatus(this.debtDetail.id, 'active').then(function() {
-            window.location = "index.html";
+				helper.sendMessage(lenderProfile.fcmToken, {
+					title: 'Debt confirmed',
+					body: profile.displayName + " has confirmed his debt."
+				});
+            }).then(function() {
+            	window.location = "index.html";
             });
           },
           reject: function() {
             console.log('profile', this.profile.bankAccount);
             if (!this.profile.bankAccount) {
-              console.log('field is required');
-              return;
+				console.log('field is required');
+				return;
             }
             datastore.updateDebtStatus(this.debtDetail.id, 'reject').then(function() {
-            window.location = "index.html";
+            	helper.sendMessage(lenderProfile.fcmToken, {
+					title: 'Debt rejected',
+					body: profile.displayName + " has rejected his debt."
+				});
+            }).then(function() {
+				window.location = "index.html";
             });
           },
 			logout: function() {
@@ -135,51 +144,32 @@
         },
 		computed: {
 			isLoggedIn: function() {
-				return !!this.user.uid;
+				return !!this.profile.uid;
 			}
 		}
       });
 
-      firebase.auth().onAuthStateChanged(function(user) {
-      if (!user) {
-        // user is not logged in
-        window.location = "/index.html";
-      } else {
-        var userData = user.providerData[0];
-        console.log('user', userData);
-        app.user = userData;
-
-        var uid = userData.uid;
-        datastore.getProfile(uid).then(function(data) {
-          console.log(data);
-          app.profile = data;
-          var debtCardId = getQueryVariable("id");
-          datastore.getDebt(debtCardId)
-          .then(function(card){
-            if (!card)
-            	return new Error('debt not found id: ' + debtCardId);
-            
-            card.id = debtCardId;
-            app.debtDetail = card;
-            return datastore.getProfile(card.lender);
-          })
-          .then(function(lenderProfile){
-            app.lenderProfile = lenderProfile;
-          })
-        });
-      }
-      });
-
-
-      function getQueryVariable(variable){
-         var query = window.location.search.substring(1);
-         var vars = query.split("&");
-         for (var i=0;i<vars.length;i++) {
-                 var pair = vars[i].split("=");
-                 if(pair[0] == variable){return pair[1];}
-         }
-         return(false);
-      }
+	datastore.watchLoginState(function(profile) {
+  		if (!profile) {
+  			window.location = "/index.html";
+  		} else {
+  			app.profile = profile;
+  			
+  			var debtId = helper.getQueryVariable("id");
+            datastore.getDebt(debtId)
+            .then(function(card){
+				if (!card)
+              		return new Error('debt not found id: ' + debtId);
+              
+          		card.id = debtId;
+          		app.debtDetail = card;
+     			return datastore.getProfile(card.lender);
+            })
+            .then(function(lenderProfile){
+				app.lenderProfile = lenderProfile;
+            });
+  		}
+  	});
     </script> 
   </body>
 </html>

@@ -23,7 +23,7 @@
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -31,7 +31,7 @@
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -58,11 +58,11 @@
           <ul class="collection">
           	<li is="debt-card"
           		v-for="(debt, key) in debts"
-          		v-if="debt.lender === user.uid && debt.status !== 'paid'"
+          		v-if="debt.lender === profile.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"
+            	v-bind:user="profile"
             	v-on:approve="approveDebt"></li>
           </ul>
           <!-- end tab 1 content -->
@@ -71,11 +71,11 @@
           <ul class="collection">
             <li is="debt-card"
           		v-for="(debt, key) in debts"
-            	v-if="debt.borrower === user.uid && debt.status !== 'paid'"
+            	v-if="debt.borrower === profile.uid && debt.status !== 'paid'"
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"></li>
+            	v-bind:user="profile"></li>
           </ul>
         </div>
         <div id="tap3" class="col s12">
@@ -86,7 +86,7 @@
             	v-bind:key="key"
             	v-bind:debt-id="key"
             	v-bind:debt="debt"
-            	v-bind:user="user"></li>
+            	v-bind:user="profile"></li>
           </ul>
         </div>
         <!-- Add Button -->
@@ -186,14 +186,28 @@
     <script src="js/q.js"></script>
     <script src="js/app.js"></script>
     <script>
+    Notification.requestPermission(function (status) {
+        if (Notification.permission !== status) {
+          Notification.permission = status;
+        }
+      });
+    
     var messaging = firebase.messaging();
     messaging.onMessage(function(payload) {
         console.log("Message received: ", payload);
         if (payload.notification.title === 'New debt created') {
-        	
         	// window.location = 'confirmDebt.html?id=' + payload.notification.body;
         	$('#fcmMsgTitle').html(payload.notification.body + ' Please <a href="' + payload.notification.click_action + '">click here</a>.');
             $('#fcmMsg').modal('open');
+            return;
+        }
+        if (payload.notification.title === 'Debt confirmed') {
+        	new Notification(payload.notification.body, {tag: 'debt-remind'});
+            return;
+        }
+        if (payload.notification.title === 'Debt rejected') {
+        	new Notification(payload.notification.body, {tag: 'debt-remind'});
+            return;
         }
     });
     
@@ -229,7 +243,6 @@
 	var app = new Vue({
 		el : '#app',
 		data : {
-			user: {},
 			profile: {},
 			debtForm: {},
 			debts: {},
@@ -255,7 +268,7 @@
 					return;
 				}
 				
-				var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
+				var debt = { lender: this.profile.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
 				datastore.addDebt(debt)
 					.then(function(debtId) {
 						datastore.getProfile(borrower)
@@ -263,7 +276,7 @@
 								helper.sendMessage(borrowerProfile.fcmToken, {
 									title: 'New debt created',
 									body: "There's a new debt pending for your review.",
-									click_action: "confirmDebt.html?id=" + debtId
+									click_action: window.location.origin + "/confirmDebt.html?id=" + debtId
 								});
 							})
 					});
@@ -291,58 +304,32 @@
 		},
 		computed: {
 			isLoggedIn: function() {
-				return !!this.user.uid;
+				return !!this.profile.uid;
 			}
 		},
 		components: {
 			'debt-card': debtCard
 		}
 	});
-		
-	firebase.auth().onAuthStateChanged(function(user) {
-		if (!user) {
-			// no user sign in
-			app.user = {};
+	
+	datastore.watchLoginState(function(profile) {
+		if (!profile) {
 			app.profile = {};
 		} else {
-			var userData = user.providerData[0];
-			console.log('user', userData);
-			app.user = userData;
+			app.profile = profile;
 			
-			datastore.addMember(userData)
-			.then(function(profile) {
-				if (!profile.bankAccount) {
-					window.location = 'profile.html';
-					return;
-				}
-				app.profile = profile;
-			})
-			.then(function() {
-				datastore.watchDashboard(userData.uid, function(data) {
-					console.log('dashboard update', data);
-					app.debts = data;
-				});
-				datastore.watchProfile(function(members) {
-					var contacts = $.extend({}, members);
-					delete contacts[userData.uid];
-					app.contacts = contacts;
-				});
-				datastore.updateLastLogin(userData.uid);
-				return messaging.requestPermission();
-			})
-			.then(function() {
-				console.log('Notification permission granted Test ..');
-	            return messaging.getToken();
-	        })
-	        .then(function(token){
-	            console.log('fcm token:', token);
-	            return datastore.updateFcmToken(userData.uid, token);
-	        })
-	        .catch(function(err) {
-				console.log('Unable to get permission to notify.', err);
-	        });
+			datastore.watchDashboard(profile.uid, function(data) {
+				console.log('dashboard update', data);
+				app.debts = data;
+			});
+			datastore.watchProfile(function(members) {
+				var contacts = $.extend({}, members);
+				delete contacts[profile.uid];
+				app.contacts = contacts;
+			});	
 		}
 	});
+		
 	</script>
     </body>
 </html>

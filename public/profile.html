@@ -24,7 +24,7 @@
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -32,7 +32,7 @@
             </ul>
             <ul class="side-nav" id="mobile-demo" style="transform: translateX(-100%);">
               <li v-if="isLoggedIn"><a href="profile.html" class="valign-wrapper user">
-                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + user.photoURL + ')' }"></div>
+                    <div class="user-pic left" v-bind:style="{ 'background-image': 'url(' + profile.photoURL + ')' }"></div>
                     <span class="user-name">{{profile.displayName}}</span>
                   </a>
               </li>
@@ -41,9 +41,7 @@
           </div>
          <div class="nav-content">
             <ul class="tabs tabs-transparent">
-              <li class="tab"><a class="active" href="#tap1">Borrow Me</a></li>
-              <li class="tab"><a href="#tap2">Lend Me</a></li>
-              <li class="tab"><a href="#tap3">Archive</a></li>
+              <li class="tab"><a class="active" href="#tap1">My Profile</a></li>
               <li class="indicator" style="right: 189px; left: 69px;"></li>
             </ul>
         </div>
@@ -104,7 +102,6 @@
         var app = new Vue({
 			el : '#app',
 			data : {
-				user: {},
 				profile: {}
 			},
 			methods: {
@@ -114,7 +111,7 @@
 						console.log('field is required');
 						return;
 					}
-					datastore.updateProfile(this.user.uid, this.profile).then(function() {
+					datastore.updateProfile(this.profile.uid, this.profile).then(function() {
 						window.location = "index.html";
 					});
 				},
@@ -125,26 +122,19 @@
 			},
 			computed: {
 				isLoggedIn: function() {
-					return !!this.user.uid;
+					return !!this.profile.uid;
 				}
 			}
 		});
         
-        firebase.auth().onAuthStateChanged(function(user) {
-			if (!user) {
-				// user is not logged in
-				window.location = "/index.html";
-			} else {
-				var userData = user.providerData[0];
-				console.log('user', userData);
-				app.user = userData;
-				
-				var uid = userData.uid;
-				datastore.getProfile(uid).then(function(profile) {
-					app.profile = profile;
-				});
-			}
-		});
+        datastore.watchLoginState(function(profile) {
+    		if (!profile) {
+    			window.location = "/index.html";
+    		} else {
+    			app.profile = profile;
+    		}
+    	});
+        
    </script> 
     </body>
 </html>
