@@ -209,6 +209,7 @@
         	new Notification(payload.notification.body, {tag: 'debt-remind'});
             return;
         }
+        new Notification(payload.notification.title, {tag:'debt-message', body: payload.notification.body});
     });
     
 	var debtCard = {

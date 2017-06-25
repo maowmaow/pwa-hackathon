@@ -103,9 +103,13 @@ DebtRemind.prototype.saveMessage = function(e) {
       photoUrl: currentUser.photoURL || '/images/profile_placeholder.png',
       time: getCurrentTime()
     }).then(function( newMsg ) {
-    // Clear message text field and SEND button state.
-    DebtRemind.resetMaterialTextfield(this.messageInput);
-    this.toggleButton();
+    	// Clear message text field and SEND button state.
+	    DebtRemind.resetMaterialTextfield(this.messageInput);
+	    this.toggleButton();
+	    
+	    if (app && app.contact && app.contact.fcmToken) {
+	    	helper.sendMessage(app.contact.fcmToken, { title: currentUser.displayName, body: inputText });
+	    }
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
