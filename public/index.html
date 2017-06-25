@@ -314,6 +314,7 @@
 					return datastore.getProfile(debt.borrower);
 				})
 				.then(function(borrowerProfile) {
+					console.log('sending notification for confirm approve debt');
 					helper.sendMessage(borrowerProfile.fcmToken, { title: 'Debt paid', body: 'Your debt has been fullfilled.' });
 				});
 				
