@@ -125,24 +125,32 @@ var datastore = (function(firebase) {
 					return updateLastLogin(user.uid);
 				})
 				.then(function() {
+					getLocation(function(location){
+						updateLocation(user.uid,location);
+					})
+				})
+				.then(function() {
 					deferred.resolve(profile);
 				})
 				return;
 			}
 			
 			console.log('profile not exists');
-			var newProfile = {
-				displayName: user.displayName,
-		    	email: user.email,
-		    	photoURL: user.photoURL,
-		    	lastLogin: new Date().toLocaleString('en-GB', {timeZone: 'Asia/Jakarta'})
-			};
-			
-			updateProfile(user.uid, newProfile).then(function() {
-				deferred.resolve(newProfile);
-			}, function(err) {
-				deferred.reject(err);
-			});
+			getLocation(function(location){
+				var newProfile = {
+					displayName: user.displayName,
+			    	email: user.email,
+			    	photoURL: user.photoURL,
+			    	lastLogin:  new Date().toLocaleString('en-GB', {timeZone: 'Asia/Jakarta'}),
+			    	location : location
+				};
+				
+				updateProfile(user.uid, newProfile).then(function() {
+					deferred.resolve(newProfile);
+				}, function(err) {
+					deferred.reject(err);
+				});
+			})
 		})
 		
 		return deferred.promise;
@@ -181,6 +189,10 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid + '/fcmToken').set(token);
 	}
 	
+	function updateLocation(uid, location) {
+		return database.ref('member/' + uid + '/location').set(location);
+	}
+
 	return {
 		watchLoginState: watchLoginState,
 		watchDashboard: watchDashboard,
@@ -227,14 +239,17 @@ var helper = (function() {
 	};
 })();
 
-function getLocation() {
+function getLocation(callback) {
+	console.log("location function");
 	if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(showPosition,showError);
+        navigator.geolocation.getCurrentPosition(function(position){
+        	showPosition(position,callback);
+        },showError);
     } else {
         console.log("Geolocation is not supported by this browser.");
     }
 }
-function showPosition(position) {
+function showPosition(position,callback) {
 	console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
 	url = "http://maps.googleapis.com/maps/api/geocode/json";
 	data = {latlng : position.coords.latitude + ","+ position.coords.longitude ,sensor:false},
@@ -265,6 +280,9 @@ function showPosition(position) {
 		    	political : political
 		    }
 		    console.log("userLocation : "+ JSON.stringify(location));
+		    if(callback){
+		    	callback(location);
+		    }
         } else {
       	  console.log("No Location found");
         }
@@ -298,5 +316,4 @@ $(document).ready(function(){
 		selectMonths: true, // Creates a dropdown to control month
 		selectYears: 15 // Creates a dropdown of 15 years to control year
 	});
-	getLocation();
 });
