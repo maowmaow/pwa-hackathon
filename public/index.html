@@ -151,12 +151,12 @@
           </div>
         </div>
     </div>
-  <div id="fcmMsg" class="modal">
-        <div class="modal-content">
-            <h4><span id="title"></span></h4>
+
+	<div id="fcmMsg" class="modal">
+		<div class="modal-content">
+			<h4><span id="fcmMsgTitle"></span></h4>
         </div>
-        
-  </div>
+	</div>
     
 	<script type="x-template" id="debt-card-template">
 			<li class="collection-item avatar z-depth-1" 
@@ -186,42 +186,18 @@
     <script src="js/q.js"></script>
     <script src="js/app.js"></script>
     <script>
-    function sendMsgToFCM(title){
-        var xmlhttp = new XMLHttpRequest(); 
-        xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
-        xmlhttp.setRequestHeader("Content-Type", "application/json");
-        xmlhttp.setRequestHeader("Authorization", "key=AIzaSyBPn3P3AiGxfg9MCNQiGczFC5QArpG56-w");
-        xmlhttp.send(JSON.stringify({notification:{title:title,body:"5-1"},to:"fcG6gxEVFBc:APA91bEVmF7HZWcbhE_esfWUzVXuPfN9OI_6XRL_YqPOUo8HYLV3zCpnarL7k2gC-4afDuLjaR9dDMl1ehprCLLIlwC-nvqMFYJuKpB0fwmzMsvlNzPBdTkfkRXwImG2MG5jTEfXtCF8"}));
-    }
-        
-    const messaging = firebase.messaging();
-        
-      messaging.requestPermission()
-        .then(function() {
-          console.log('Notification permission granted Test ..');
-             return messaging.getToken();
-        })
-        .then(function(token){
-               console.log(token);
-            return datastore.updateProfileToken(uid, token);
-               
-        })
-        .catch(function(err) {
-          console.log('Unable to get permission to notify.', err);
-        });
-
-     /*  notify */
-        
+    var messaging = firebase.messaging();
     messaging.onMessage(function(payload) {
-        console.log("Message received. ", payload);
-        // [START_EXCLUDE]
-        // Update the UI to include the received message.
-        $('#title').html(JSON.stringify(payload,null,1));
-        $('#fcmMsg').modal('open');
-        // [END_EXCLUDE]
+        console.log("Message received: ", payload);
+        if (payload.notification.title === 'New debt created') {
+        	
+        	// window.location = 'confirmDebt.html?id=' + payload.notification.body;
+        	$('#fcmMsgTitle').html(payload.notification.body + ' Please <a href="' + payload.notification.click_action + '">click here</a>.');
+            $('#fcmMsg').modal('open');
+        }
     });
     
-	  var debtCard = {
+	var debtCard = {
 		props: {
 			'debtId': { type: String },
 			'debt': { type: Object, default: function() { return {}; } }, 
@@ -248,100 +224,125 @@
 				return (this.debt.lender === this.user.uid)? this.debt.borrower : this.debt.lender;
 			}
 		}
-	  }
-		var app = new Vue({
-			el : '#app',
-			data : {
-				user: {},
-				profile: {},
-				debtForm: {},
-				debts: {},
-				contacts: {}
+	}
+	
+	var app = new Vue({
+		el : '#app',
+		data : {
+			user: {},
+			profile: {},
+			debtForm: {},
+			debts: {},
+			contacts: {}
+		},
+		methods: {
+			login: function() {
+				var provider = new firebase.auth.GoogleAuthProvider();
+				firebase.auth().signInWithPopup(provider);
 			},
-			methods: {
-				login: function() {
-					var provider = new firebase.auth.GoogleAuthProvider();
-					firebase.auth().signInWithPopup(provider);
-				},
-				logout: function() {
-					firebase.auth().signOut();
-					$(".button-collapse").sideNav('hide');
-				},
-				addDebt: function() {
-					var borrower = $('#borrower').val();
-					var dueDate = $('#duedate').val();
-					var desc = this.debtForm.description || '';
-					
-					if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
-						return;
-					}
-					
-					var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
-					datastore.addDebt(debt);
-					
-					$('#borrower-btn').text('SELECT BORROWER');
-					$('#borrower').val('');
-					$('#duedate').val('');
-					this.debtForm = {};
-				},
-				selectBorrower: function(cid) {
-					var contact = this.contacts[cid];
-					console.log('select borrower', contact);
-					$('#borrower-btn').text(contact.displayName);
-					$('#borrower').val(cid);
-				},
-				approveDebt: function(debtId) {
-					$('#approveModal').modal('open');
-					$('#approveModal').data('debt-id', debtId);
-				},
-				confirmApprove: function() {
-					var debtId = $('#approveModal').data('debt-id');
-					console.log('confirm approving debt', debtId);
-					datastore.updateDebtStatus(debtId, 'paid');
-				}
+			logout: function() {
+				firebase.auth().signOut();
+				$(".button-collapse").sideNav('hide');
 			},
-			computed: {
-				isLoggedIn: function() {
-					return !!this.user.uid;
-				}
-			},
-			components: {
-				'debt-card': debtCard
-			}
-		});
-		
-		firebase.auth().onAuthStateChanged(function(user) {
-			if (!user) {
-				// no user sign in
-				app.user = {};
-				app.profile = {};
-			} else {
-				var userData = user.providerData[0];
-				console.log('user', userData);
-				app.user = userData;
+			addDebt: function() {
+				var self = this;
 				
-				datastore.addMember(userData)
-				.then(function(profile) {
-					if (!profile.bankAccount) {
-						window.location = 'profile.html';
-						return;
-					}
-					app.profile = profile;
-				})
-				.then(function() {
-					datastore.watchDashboard(userData.uid, function(data) {
-						console.log('dashboard update', data);
-						app.debts = data;
+				var borrower = $('#borrower').val();
+				var dueDate = $('#duedate').val();
+				var desc = this.debtForm.description || '';
+				
+				if (borrower.trim().length == 0 || !this.debtForm.amount || dueDate.trim().length == 0) {
+					return;
+				}
+				
+				var debt = { lender: this.user.uid, borrower: borrower, amount: this.debtForm.amount, dueDate: dueDate, description: desc };
+				datastore.addDebt(debt)
+					.then(function(debtId) {
+						datastore.getProfile(borrower)
+							.then(function(borrowerProfile) {
+								helper.sendMessage(borrowerProfile.fcmToken, {
+									title: 'New debt created',
+									body: "There's a new debt pending for your review.",
+									click_action: "confirmDebt.html?id=" + debtId
+								});
+							})
 					});
-					datastore.watchProfile(function(members) {
-						var contacts = $.extend({}, members);
-						delete contacts[userData.uid];
-						app.contacts = contacts;
-					});
-					datastore.updateLastLogin(userData.uid);
-				});
+				
+				$('#borrower-btn').text('SELECT BORROWER');
+				$('#borrower').val('');
+				$('#duedate').val('');
+				this.debtForm = {};
+			},
+			selectBorrower: function(cid) {
+				var contact = this.contacts[cid];
+				console.log('select borrower', contact);
+				$('#borrower-btn').text(contact.displayName);
+				$('#borrower').val(cid);
+			},
+			approveDebt: function(debtId) {
+				$('#approveModal').modal('open');
+				$('#approveModal').data('debt-id', debtId);
+			},
+			confirmApprove: function() {
+				var debtId = $('#approveModal').data('debt-id');
+				console.log('confirm approving debt', debtId);
+				datastore.updateDebtStatus(debtId, 'paid');
 			}
-		});
+		},
+		computed: {
+			isLoggedIn: function() {
+				return !!this.user.uid;
+			}
+		},
+		components: {
+			'debt-card': debtCard
+		}
+	});
+		
+	firebase.auth().onAuthStateChanged(function(user) {
+		if (!user) {
+			// no user sign in
+			app.user = {};
+			app.profile = {};
+		} else {
+			var userData = user.providerData[0];
+			console.log('user', userData);
+			app.user = userData;
+			
+			datastore.addMember(userData)
+			.then(function(profile) {
+				if (!profile.bankAccount) {
+					window.location = 'profile.html';
+					return;
+				}
+				app.profile = profile;
+			})
+			.then(function() {
+				datastore.watchDashboard(userData.uid, function(data) {
+					console.log('dashboard update', data);
+					app.debts = data;
+				});
+				datastore.watchProfile(function(members) {
+					var contacts = $.extend({}, members);
+					delete contacts[userData.uid];
+					app.contacts = contacts;
+				});
+				datastore.updateLastLogin(userData.uid);
+				return messaging.requestPermission();
+			})
+			.then(function() {
+				console.log('Notification permission granted Test ..');
+	            return messaging.getToken();
+	        })
+	        .then(function(token){
+	            console.log('fcm token:', token);
+	            return datastore.updateFcmToken(userData.uid, token);
+	        })
+	        .catch(function(err) {
+				console.log('Unable to get permission to notify.', err);
+	        });
+		}
+	});
 	</script>
     </body>
 </html>

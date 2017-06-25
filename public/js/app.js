@@ -33,26 +33,6 @@ var datastore = (function(firebase) {
 	
 	firebase.initializeApp(config);
     
-    /*  notify */
-     const messaging = firebase.messaging();
-    
-    messaging.requestPermission()
-        .then(function() {
-          console.log('Notification permission granted11 ..');
-             return messaging.getToken();
-        })
-         .then(function(token){
-               console.log(token);
-        })
-        .catch(function(err) {
-          console.log('Unable to get permission to notify.', err);
-        });
-
-    
-     /*  notify */
-    
-    
-    
 	var database = firebase.database();
 	
 	function watchDashboard(uid, callback) {
@@ -70,8 +50,12 @@ var datastore = (function(firebase) {
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
-		database.ref('dashboard/' + debt.lender + '/' + key).set(debt);
-		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
+		return Q.all([
+				database.ref('dashboard/' + debt.lender + '/' + key).set(debt),
+				database.ref('dashboard/' + debt.borrower + '/' + key).set(debt)])
+			.then(function() {
+				return key;
+			});
 	}
 	
 	function getDebt(debtId) {
@@ -153,6 +137,10 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid + '/lastLogin').set(new Date().toUTCString());
 	}
 	
+	function updateFcmToken(uid, token) {
+		return database.ref('member/' + uid + '/fcmToken').set(token);
+	}
+	
 	return {
 		watchDashboard: watchDashboard,
 		watchProfile: watchProfile,
@@ -163,7 +151,8 @@ var datastore = (function(firebase) {
 		getDebt: getDebt,
 		updateDebtStatus: updateDebtStatus,
 		deleteDebt: deleteDebt,
-		updateLastLogin: updateLastLogin
+		updateLastLogin: updateLastLogin,
+		updateFcmToken: updateFcmToken
 	}
 	
 })(firebase);
@@ -179,8 +168,21 @@ var helper = (function() {
 	       }
 	       return(false);
 	}
+	function sendMessage(token, data) {
+		var xmlhttp = new XMLHttpRequest(); 
+        xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.setRequestHeader("Authorization", "key=AIzaSyBPn3P3AiGxfg9MCNQiGczFC5QArpG56-w");
+        xmlhttp.send(JSON.stringify({
+        	notification: data,
+        	to: token
+        }));
+        
+	}
+	
 	return {
-		getQueryVariable:getQueryVariable
+		getQueryVariable:getQueryVariable,
+		sendMessage: sendMessage
 	};
 })();
 
