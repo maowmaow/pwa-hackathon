@@ -20,7 +20,7 @@ var urlsToCache = [
   '/fonts/Material_Icons.woff2',
   '/js/firebase.js',
   '/js/firebase-app.js',
-  '/js/firebase-messaging.js',
+  '/js/firebase-messaging.js',  
   '/js/jquery-3.2.1.min.js',
   '/js/materialize.min.js',
   '/js/app.js',
@@ -34,7 +34,7 @@ var urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
-	console.log('service: installing');
+	console.log('service: installing..');
 	event.waitUntil(
 		caches.open(CACHE_NAME)
 			  .then(function(cache) {
