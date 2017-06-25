@@ -1,0 +1,15 @@
+ <a href="#" onclick="sendMsg();" data-activates="mobile-demo" class="button-collapse">
+         test
+            </a>
+        <script>
+        
+       function sendMsg(){
+           alert("hi");
+           var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+            
+            xmlhttp.open('POST', 'http://fcm.googleapis.com/fcm/send', true);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.setRequestHeader("Authorization", "key=AIzaSyBPn3P3AiGxfg9MCNQiGczFC5QArpG56-w");
+            xmlhttp.send(JSON.stringify({notification:{title:"Portugal vs. Denmark",body:"5-1"},to:"fcG6gxEVFBc:APA91bEVmF7HZWcbhE_esfWUzVXuPfN9OI_6XRL_YqPOUo8HYLV3zCpnarL7k2gC-4afDuLjaR9dDMl1ehprCLLIlwC-nvqMFYJuKpB0fwmzMsvlNzPBdTkfkRXwImG2MG5jTEfXtCF8"}));
+       }
+</script>
