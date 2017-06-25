@@ -32,6 +32,27 @@ var datastore = (function(firebase) {
 	};
 	
 	firebase.initializeApp(config);
+    
+    /*  notify */
+     const messaging = firebase.messaging();
+    
+    messaging.requestPermission()
+        .then(function() {
+          console.log('Notification permission granted11 ..');
+             return messaging.getToken();
+        })
+         .then(function(token){
+               console.log(token);
+        })
+        .catch(function(err) {
+          console.log('Unable to get permission to notify.', err);
+        });
+
+    
+     /*  notify */
+    
+    
+    
 	var database = firebase.database();
 	
 	function watchDashboard(uid, callback) {
