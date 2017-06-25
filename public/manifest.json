@@ -11,7 +11,7 @@
     "src": "img/ic_launcher.png",
     "sizes": "384x384",
     "type": "image/png"
-    },  
+    },
     {  
       "src": "/img/ic_launcher-c512.png",  
       "sizes": "512x512",  
@@ -19,5 +19,4 @@
     }
  ],
  "gcm_sender_id": "103953800507"
-    
 }

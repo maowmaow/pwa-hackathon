@@ -1,7 +1,10 @@
 
-var CACHE_NAME = 'my-site-cache-v1';
+var CACHE_NAME = 'my-site-cache-v3'; 
 var urlsToCache = [
   '/index.html',
+  '/chatroom.html',
+  '/confirmDebt.html',
+  '/profile.html',
   '/css/materialize.min.css',
   '/css/app.css',
   '/fonts/roboto/Roboto-Bold.woff',
@@ -14,11 +17,18 @@ var urlsToCache = [
   '/fonts/roboto/Roboto-Regular.woff2',
   '/fonts/roboto/Roboto-Thin.woff',
   '/fonts/roboto/Roboto-Thin.woff2',
+  '/fonts/Material_Icons.woff2',
   '/js/firebase.js',
   '/js/jquery-3.2.1.min.js',
   '/js/materialize.min.js',
   '/js/app.js',
-  '/img/lannister.png'
+  '/js/vue.min.js',
+  '/js/q.js',
+  '/js/main.js',
+  '/img/ic_launcher_c512.png',
+  '/img/ic_launcher.png',
+  '/img/ic_launcher2.png',
+  '/img/default-profile-pic.png'
 ];
 
 self.addEventListener('install', function(event) {
@@ -28,7 +38,28 @@ self.addEventListener('install', function(event) {
 			  .then(function(cache) {
 				  return cache.addAll(urlsToCache);
 		      })
+		      .then(function() {
+		    	  return self.skipWaiting();
+		      })
 	);	
+});
+
+self.addEventListener('activate', function(event) {
+  console.log('service: activate');
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (CACHE_NAME !== cacheName) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+    .then(function() {
+    	return self.clients.claim();
+    })
+  );
 });
 
 

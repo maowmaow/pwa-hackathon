@@ -13,64 +13,104 @@
     <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
     <link href="css/app.css" rel="stylesheet">
 </head>
-<body>
+<body class="teal lighten-5">
 
 <div class="container">
-  <div hidden id="user-pic"></div>
-  <div hidden id="user-name"></div>
-  <button hidden id="sign-out">
-    Sign-out
-  </button>
-  <button hidden id="sign-in">
-    <i class="material-icons">account_circle</i>Sign-in with Google
-  </button>
-
-  <main class="mdl-layout__content mdl-color--grey-100">
-    <div id="messages-card-container" class="col s12" style="height: 90%;">
+  <main id="chat-room" class="mdl-layout__content mdl-color--grey-100">
+    <div class="chat-menu teal lighten-3" id="app">
+      <a class="back" href="/"><i class="material-icons">navigate_before</i> </a>
+      <div class="chat-top-user"><img v-bind:src="contact.photoURL" draggable="false"/>
+      <div class="name">{{contact.displayName}}</div>
+      <div class="last">Last login: {{contact.lastLogin}}</div></div>
+    </div>
+    <div id="messages-card-container" class="col s12" style="height: 100%;overflow: auto;">
 
       <!-- Messages container -->
-      <div id="messages-card" class="card">
+      <div id="messages-card">
         <div class="mdl-color-text--grey-600">
           <div id="messages">
             <span id="message-filler"></span>
           </div>
-          <form id="message-form" action="#">
-            <div class="row">
-              <div class="input-field col s12">
-                <input id="message" type="text" class="validate">
-                <label for="password">Message...</label>
-              </div>
-            </div>
+        </div>
+      </div>
+      <div hidden id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+      </div>
+    </div>
 
-            <button id="submit" class="waves-effect waves-light btn" disabled type="submit">
-              Send
-            </button>
-          </form>
+    <div class="chat-input">
+      <div class="row">
+        <div class="col s2">
           <form id="image-form" action="#">
-            <input id="mediaCapture" class="waves-effect waves-light btn" type="file" accept="image/*,capture=camera">
-            <button id="submitImage" class="waves-effect waves-light btn" title="Add an image">
+            <input hidden id="mediaCapture" type="file" accept="image/*,capture=camera">
+            <button id="submitImage" class="waves-effect waves-light btn col s12" title="Add an image">
               <i class="material-icons">image</i>
             </button>
           </form>
         </div>
+        <div class="col s10">
+          <form id="message-form" action="#">
+            <div class="row">
+              <div class="input-field col s12" style="margin-top: 0">
+                <input id="message" type="text" placeholder="type message..." class="validate col s10" style="height: 35px;">
+                <button id="submit" class="waves-effect waves-light btn col s2" disabled type="submit">
+                  <i class="material-icons">send</i>
+              </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
-        <div class="mdl-snackbar__text"></div>
-        <button class="mdl-snackbar__action" type="button"></button>
-      </div>
-
     </div>
   </main>
 </div>
 
-<!-- Import and configure the Firebase SDK -->
-<!-- These scripts are made available when the app is served or deployed on Firebase Hosting -->
-<!-- If you do not want to serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup -->
 <script src="js/firebase.js"></script>
 <script src="js/jquery-3.2.1.min.js"></script>
 <script src="js/materialize.min.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/q.js"></script>
 <script src="js/app.js"></script>
 <script src="js/main.js"></script>
-
+<script> 
+var app = new Vue({
+	el : '#app',
+	data : {
+		user: {},
+		profile: {},
+		contact: {}
+	},
+	methods: {
+	}
+});
+      
+firebase.auth().onAuthStateChanged(function(user) {
+	if (!user) {
+		// user is not logged in
+		window.location = "/index.html";
+	} else {
+		var userData = user.providerData[0];
+		console.log('user', userData);
+		app.user = userData;
+		
+		var uid = userData.uid;
+		datastore.getProfile(uid).then(function(profile) {
+			app.profile = profile;
+			
+			var debtId = helper.getQueryVariable("id");
+			datastore.getDebt(debtId)
+			.then(function(debt) {
+				return datastore.getProfile(debt.lender === uid? debt.borrower : debt.lender);
+			})
+			.then(function(profile) {
+				if (!profile.photoURL)
+					profile.photoURL = "http://supritmedicals.com/img/thumb.png";
+				app.contact = profile;
+			});
+		});
+	}
+});
+ </script> 
 </body>
 </html>

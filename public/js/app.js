@@ -16,7 +16,7 @@
 	 	}
 	}
 	
-	//registerServiceWorker();
+	registerServiceWorker();
 })(window, navigator);
 
 
@@ -66,7 +66,7 @@ var datastore = (function(firebase) {
 	}
 	
 	function addDebt(debt) {
-		debt.paid = false;
+		debt.status = 'pending';
 		console.log('adding debt', debt);
 		var key = database.ref('debts').push(debt).key;
 		
@@ -74,23 +74,45 @@ var datastore = (function(firebase) {
 		database.ref('dashboard/' + debt.borrower + '/' + key).set(debt);
 	}
 	
+	function getDebt(debtId) {
+		return database.ref('debts/' + debtId).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
+	}
+	
+	function updateDebtStatus(debtId, newStatus) {
+		return getDebt(debtId).then(function(debt) {
+			return Q.all([
+				database.ref('debts/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.lender + '/' + debtId + '/status').set(newStatus),
+				database.ref('dashboard/' + debt.borrower + '/' + debtId + '/status').set(newStatus)
+			]);
+		});
+	}
+	
+	function deleteDebt(debtId) {
+		return database.ref('debts/' + debtId).remove();
+	}
+	
 	function addMember(user) {
 		console.log('begin: add member');
 		var deferred = Q.defer();
 		
-		getProfile(user.uid).then(function(snapshot) {
-			
-			var profile = snapshot.val();
+		getProfile(user.uid).then(function(profile) {
+
 			if (profile != null) {
 				console.log('profile already exists');
-				deferred.resolve(profile);
+				updatePicture(user.uid, user.photoURL).then(function() {
+					deferred.resolve(profile);
+				})
 				return;
 			}
 			
 			console.log('profile not exists');
 			var newProfile = {
 					displayName: user.displayName,
-			    	email: user.email
+			    	email: user.email,
+			    	photoURL: user.photoURL
 				};
 			
 			updateProfile(user.uid, newProfile).then(function() {
@@ -103,9 +125,19 @@ var datastore = (function(firebase) {
 		return deferred.promise;
 	}
 	
+	function watchProfile(callback) {
+		return database.ref('member').on('value', function(snapshot) {
+			if (callback) {
+				callback(snapshot.val());
+			}
+		});
+	}
+	
 	// return promise
 	function getProfile(uid) {
-		return database.ref('member/' + uid).once('value');
+		return database.ref('member/' + uid).once('value').then(function(snapshot) {
+			return snapshot.val();
+		});
 	}
 	
 	// uid = string, profile = { displayName, email, bankAccount }
@@ -113,16 +145,44 @@ var datastore = (function(firebase) {
 		return database.ref('member/' + uid).set(profile);
 	}
 	
+	function updatePicture(uid, photoURL) {
+		return database.ref('member/' + uid + '/photoURL').set(photoURL);
+	}
+	
+	function updateLastLogin(uid) {
+		return database.ref('member/' + uid + '/lastLogin').set(new Date().toUTCString());
+	}
+	
 	return {
 		watchDashboard: watchDashboard,
+		watchProfile: watchProfile,
 		addDebt: addDebt,
 		addMember: addMember,
 		getProfile: getProfile,
-		updateProfile: updateProfile
+		updateProfile: updateProfile,
+		getDebt: getDebt,
+		updateDebtStatus: updateDebtStatus,
+		deleteDebt: deleteDebt,
+		updateLastLogin: updateLastLogin
 	}
 	
 })(firebase);
 
+var helper = (function() {
+
+	function getQueryVariable(variable){
+	       var query = window.location.search.substring(1);
+	       var vars = query.split("&");
+	       for (var i=0;i<vars.length;i++) {
+	               var pair = vars[i].split("=");
+	               if(pair[0] == variable){return pair[1];}
+	       }
+	       return(false);
+	}
+	return {
+		getQueryVariable:getQueryVariable
+	};
+})();
 
 $(document).ready(function(){
   // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered

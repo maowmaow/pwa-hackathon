@@ -257,10 +257,11 @@ DebtRemind.resetMaterialTextfield = function(element) {
 // }
 if(filename == '/chatroom.html'){
   DebtRemind.MESSAGE_TEMPLATE =
-    '<div class="message-container comment">' +
-      '<div class="spacing"><div class="pic"></div></div>' +
+    '<div class="message-container chat">' +
+      '<div class="people"><div class="pic"></div>' +
+      '<div class="name"></div></div>' +
       '<div class="message"></div>' +
-      '<div class="name"></div>' +
+      '<time>18.29</time>' +
       // '<div class="timeago" style="float: right;"></div>' +
     '</div>';
 }
@@ -292,6 +293,11 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
   if (picUrl) {
     div.querySelector('.pic').style.backgroundImage = 'url(' + picUrl + ')';
   }
+  if(name == this.auth.currentUser.displayName){
+    div.className += " other";
+  }else{
+    div.className += " self";
+  }
   div.querySelector('.name').textContent = name;
   
   var messageElement = div.querySelector('.message');
@@ -306,41 +312,13 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
 	  messageElement.innerHTML = messageElement.innerHTML.replace(urlRegex, link);
 
   } else if (imageUri) { // If the message is an image.
-    var modal_image = document.createElement('img');
     var act_image = document.createElement('img');
-    var modal = document.createElement('div')
-    var bg = document.createElement('div')
-    var con = document.createElement('div')
-    var button = document.createElement('button')
-    modal.setAttribute('class', 'modal');
-    modal_image.setAttribute('style','max-width: 100%;max-height: 100%;');
-    bg.setAttribute('class', 'modal-background');
-    con.setAttribute('class', 'modal-content');
-    button.setAttribute('class', 'modal-close');
-
-    act_image.addEventListener("click", function(){
-      $("#" + key + " > .message > .modal").addClass('is-active')
-    });
-    button.addEventListener("click", function(){
-      $("#" + key + " > .message > .modal").removeClass('is-active')
-    });
-
-    act_image.addEventListener('load', function() {
-      this.messageList.scrollTop = this.messageList.scrollHeight;
-    }.bind(this));
     modal_image.addEventListener('load', function() {
       this.messageList.scrollTop = this.messageList.scrollHeight;
     }.bind(this));
     this.setImageUrl(imageUri, act_image);
-    this.setImageUrl(imageUri, modal_image);
     messageElement.innerHTML = '';
-
-    con.appendChild(modal_image)
-    modal.appendChild(bg)
-    modal.appendChild(con)
-    modal.appendChild(button)
     messageElement.appendChild(modal)
-    messageElement.appendChild(act_image)
   }
 
   // Set time
@@ -352,10 +330,12 @@ DebtRemind.prototype.displayMessage = function(key, name, text, picUrl, imageUri
 
   // Added by IQ - Scroll to bottom when in comment page
   if(this.messagesRef.key == "messagesChat") {
-  	this.messageList.scrollTop = this.messageList.scrollHeight; 
+  	//this.messageList.scrollTop = this.messageList.scrollHeight; 
+    window.scrollTo(0,document.body.scrollHeight);
   }
   else{
-  	this.messageList.scrollTop = this.messageList.scrollHeight - this.messageList.scrollTop - this.messageList.scrollHeight;
+  	//this.messageList.scrollTop = this.messageList.scrollHeight - this.messageList.scrollTop - this.messageList.scrollHeight;
+    window.scrollTo(0,document.body.scrollHeight);
   }
   this.messageInput.focus();
 };
